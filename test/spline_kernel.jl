@@ -1,4 +1,3 @@
-using LinearAlgebra, CSV
 function load_motor_data()
     df = CSV.read("data/motor.csv");
     x = df.times;
