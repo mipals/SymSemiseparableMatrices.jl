@@ -15,6 +15,11 @@ Km = SymEGRSSCholesky(K)
 
 xt = randn(n,1);
 @test isapprox(Km'\(Km\xt), chol.U\(chol.L\xt), atol=1e-6)
+@test isapprox(inv(Km), chol.U\(chol.L\Diagonal(ones(K.n))), atol=1e-6)
+@test isapprox(inv(Km,xt),  chol.U\(chol.L\xt), atol=1e-6)
+@test isapprox(Km*xt, chol.L*xt, atol=1e-6)
+@test isapprox(Km'*xt, chol.U*xt, atol=1e-6)
 
 # Testing logdet
 @test isapprox(logdet(Km), logdet(chol.L), atol=1e-10)
+@test isapprox(logdet(Km'), logdet(chol.U), atol=1e-10)

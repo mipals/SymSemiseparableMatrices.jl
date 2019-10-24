@@ -7,3 +7,4 @@ x = randn(n);
 Kfull = tril(U*V') + triu(V*U',1);
 
 @test isapprox(K*x, Kfull*x, atol = 1e-6)
+@test isapprox(K'*x, Kfull'*x, atol = 1e-6)
