@@ -18,14 +18,12 @@ include("adjointoperator.jl")
 
 # Matrices
 include("matrices/symegrss.jl")
-# include("matricess/SemisepChol.jl")
-# include("matrices/DiagSemisep.jl")
-# include("matrices/DiagSemisepChol.jl")
+include("matrices/symegrsscholesky.jl")
 
 include("syntax.jl")
 
 # # More constructors
-# EGRSSCholesky(K::EGRSSMatrix) = EGRSSCholesky(K.n, K.p, K.U, ss_create_w(K.U, K.V))
+SymEGRSSCholesky(K::SymEGRSSMatrix) = SymEGRSSCholesky(K.n, K.p, K.U, ss_create_w(K.U, K.V))
 # EGRSSMatrix(L::EGRSSCholesky) = EGRSSMatrix(  L.n, L.p, L.U, ss_create_v(L.U, L.W))
 # EGRQSMatrix(L::EGRSSMatrix, d::AbstractArray) = EGRQSMatrix(L.n, L.p, L.U, L.V, d)
 # function EGRQSCholesky(L::EGRQSMatrix)
