@@ -1,6 +1,8 @@
 using SymSemiseparableMatrices
 using Test
+# Why do I have to import LinearAlgebra again?
+using LinearAlgebra
 
 @testset "SymSemiseparableMatrices.jl" begin
-    # Write your own tests here.
+    include("test_symegrss.jl")
 end
