@@ -5,16 +5,16 @@ t = Vector(0.1:0.1:1)
 n = length(t);
 
 # Creating a test matrix Σ = tril(UV') + triu(VU',1) that is PSD
-#  using the spline kernel 
+#  using the spline kernel
 p = 2;
 U, V = spline_kernel(t, p);
 Σ    = spline_kernel_matrix(U, V);
 chol = cholesky(Σ)
 
 # Creating a symmetric extended generator representable semiseperable matrix
-K  = SymEGRSSMatrix(U,V)
+K  = SymSemiseparable(U,V)
 # Calculating its Cholesky factorization
-Km = SymEGRSSCholesky(K)
+Km = SymSemiseparableChol(K)
 # Creating a test vector
 xt = randn(n,1);
 

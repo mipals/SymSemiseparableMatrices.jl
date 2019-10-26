@@ -1,6 +1,6 @@
-export SymEGRSSMatrix
+export SymSemiseparable
 
-struct SymEGRSSMatrix <: SymSemiseparableMatrix
+struct SymSemiseparable <: SymSemiseparableMatrix
     n::Int64
     p::Int64
     U::AbstractArray
@@ -8,18 +8,18 @@ struct SymEGRSSMatrix <: SymSemiseparableMatrix
 end
 
 # Constuctors
-function SymEGRSSMatrix(U::AbstractArray, V::AbstractArray)
+function SymSemiseparable(U::AbstractArray, V::AbstractArray)
     if size(U,1) == size(V,1) && size(U,2) == size(V,2)
-        return SymEGRSSMatrix(size(U,1),size(U,2),U,V);
+        return SymSemiseparable(size(U,1),size(U,2),U,V);
     else
         error("Dimension mismatch between generators U and V")
     end
 end
 
 # Mappings
-mul!(y::AbstractArray, L::SymEGRSSMatrix, 		           x::AbstractArray) =
+mul!(y::AbstractArray, L::SymSemiseparable, 		         x::AbstractArray) =
     ss_mul_mat!(y, L.U, L.V, x);
-mul!(y::AbstractArray, L::AdjointOperator{SymEGRSSMatrix}, x::AbstractArray) =
+mul!(y::AbstractArray, L::AdjointOperator{SymSemiseparable}, x::AbstractArray) =
     ss_mul_mat!(y, L.A.U, L.A.V, x);
 
 #####################################################################

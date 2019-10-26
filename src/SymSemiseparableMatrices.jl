@@ -23,7 +23,7 @@ include("matrices/symegrsscholesky.jl")
 include("syntax.jl")
 
 # # More constructors
-SymEGRSSCholesky(K::SymEGRSSMatrix) = SymEGRSSCholesky(K.n, K.p, K.U, ss_create_w(K.U, K.V))
+SymSemiseparableChol(K::SymSemiseparable) = SymSemiseparableChol(K.n, K.p, K.U, ss_create_w(K.U, K.V))
 # EGRSSMatrix(L::EGRSSCholesky) = EGRSSMatrix(  L.n, L.p, L.U, ss_create_v(L.U, L.W))
 # EGRQSMatrix(L::EGRSSMatrix, d::AbstractArray) = EGRQSMatrix(L.n, L.p, L.U, L.V, d)
 # function EGRQSCholesky(L::EGRQSMatrix)

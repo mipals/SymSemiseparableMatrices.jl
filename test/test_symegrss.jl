@@ -3,7 +3,7 @@ n = 100;
 p = 5;
 U = randn(n,p);
 V = randn(n,p);
-K = SymEGRSSMatrix(U,V);
+K = SymSemiseparable(U,V);
 x = randn(n);
 Kfull = tril(U*V') + triu(V*U',1);
 

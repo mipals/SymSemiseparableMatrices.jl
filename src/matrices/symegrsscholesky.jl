@@ -1,6 +1,6 @@
-export SymEGRSSCholesky
+export SymSemiseparableChol
 
-struct SymEGRSSCholesky <: SymSemiseparableCholesky
+struct SymSemiseparableChol <: SymSemiseparableCholesky
     n::Int64
     p::Int64
     U::AbstractArray
@@ -8,31 +8,31 @@ struct SymEGRSSCholesky <: SymSemiseparableCholesky
 end
 
 # Constuctors
-function SymEGRSSCholesky(U::AbstractArray, W::AbstractArray)
+function SymSemiseparableChol(U::AbstractArray, W::AbstractArray)
 	if size(U,1) == size(W,1) && size(U,2) == size(W,2)
-		return SymEGRSSCholesky(size(U,1),size(U,2),U,W)
+		return SymSemiseparableChol(size(U,1),size(U,2),U,W)
 	else
 		error("Dimension mismatch between the generators U and W")
 	end
 end
 
 # Mappings
-mul!(y::AbstractArray, L::SymEGRSSCholesky, 		         b::AbstractArray) =
+mul!(y::AbstractArray, L::SymSemiseparableChol, 		         b::AbstractArray) =
 	ss_tri_mul!(y, L.U,   L.W,   b)
-mul!(y::AbstractArray, L::AdjointOperator{SymEGRSSCholesky}, b::AbstractArray) =
+mul!(y::AbstractArray, L::AdjointOperator{SymSemiseparableChol}, b::AbstractArray) =
 	ssa_tri_mul!(y, L.A.U, L.A.W, b)
-inv!(y::AbstractArray, L::SymEGRSSCholesky, 		    	 b::AbstractArray) =
+inv!(y::AbstractArray, L::SymSemiseparableChol, 		    	 b::AbstractArray) =
 	ss_forward!(y, L.U,   L.W,   b);
-inv!(y::AbstractArray, L::AdjointOperator{SymEGRSSCholesky}, b::AbstractArray) =
+inv!(y::AbstractArray, L::AdjointOperator{SymSemiseparableChol}, b::AbstractArray) =
 	ssa_backward!(y, L.A.U, L.A.W, b);
-newlogdet(L::SymEGRSSCholesky) = ss_logdet(L.U, L.W)
-newlogdet(L::AdjointOperator{SymEGRSSCholesky}) = ss_logdet(L.A.U, L.A.W)
+newlogdet(L::SymSemiseparableChol) = ss_logdet(L.U, L.W)
+newlogdet(L::AdjointOperator{SymSemiseparableChol}) = ss_logdet(L.A.U, L.A.W)
 
-#### Inverse of a SymEGRSSCholesky using ####
-function inv(L::SymEGRSSCholesky)
+#### Inverse of a SymSemiseparableChol using ####
+function inv(L::SymSemiseparableChol)
 	return L'\(L\Diagonal(ones(L.n)))
 end
-function inv(L::SymEGRSSCholesky, b::AbstractArray)
+function inv(L::SymSemiseparableChol, b::AbstractArray)
 	return L'\(L\b)
 end
 
