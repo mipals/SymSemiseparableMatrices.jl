@@ -9,7 +9,7 @@ A package for efficiently dealing with matrices of the form
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\dpi{100}&space;K=\text{\textbf{tril}}(UV^T)&space;&plus;&space;\text{\textbf{triu}}(VU^T,1)" target="_blank"><img src="https://latex.codecogs.com/png.latex?\dpi{100}&space;K=\text{\textbf{tril}}(UV^T)&space;&plus;&space;\text{\textbf{triu}}(VU^T,1)" title="K=\text{\textbf{tril}}(UV^T) + \text{\textbf{triu}}(VU^T,1)" /></a>
 
-and 
+as well as
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\dpi{100}&space;K=\text{\textbf{tril}}(UV^T)&space;&plus;&space;\text{\textbf{tril}}(VU^T,1)&space;&plus;&space;\text{\textbf{diag}}(d)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\dpi{100}&space;K=\text{\textbf{tril}}(UV^T)&space;&plus;&space;\text{\textbf{tril}}(VU^T,1)&space;&plus;&space;\text{\textbf{diag}}(d)" title="K=\text{\textbf{tril}}(UV^T) + \text{\textbf{tril}}(VU^T,1) + \text{\textbf{diag}}(d)" /></a>
 
