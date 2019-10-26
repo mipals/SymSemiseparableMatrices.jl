@@ -26,19 +26,6 @@ mul!(y::AbstractArray, L::AdjointOperator{SymSemiseparable}, x::AbstractArray) =
 #### Extended generator representable {p}-semiseperable matrices ####
 #####################################################################
 
-#### Matrix vector product ####
-# function ss_mul!(y::AbstractArray, U::AbstractArray, V::AbstractArray, x::AbstractArray)
-#      n, m = size(U);
-#      Vbar = zeros(m);
-#      Ubar = U'*x;
-#      for i = 1:n
-#          tmpV  = V[i,:]
-#          tmpU  = U[i,:]
-#          Vbar += tmpV*x[i];
-#          Ubar -= tmpU*x[i];
-#          y[i]  = Vbar'*tmpU + Ubar'*tmpV;
-#      end
-# end
 #### Matrix-matrix product ####
 function ss_mul_mat!(Y::AbstractArray, U::AbstractArray, V::AbstractArray, X::AbstractArray)
     n, m = size(U);

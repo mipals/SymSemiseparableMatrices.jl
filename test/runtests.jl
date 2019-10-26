@@ -4,6 +4,7 @@ using Test
 using LinearAlgebra
 
 @testset "SymSemiseparableMatrices.jl" begin
-    include("test_symegrss.jl")
-    include("test_symegrsscholesky.jl")
+    include("test_symsep.jl")
+    include("test_symsepchol.jl")
+    include("test_diasymsep.jl")
 end

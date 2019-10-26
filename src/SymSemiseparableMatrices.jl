@@ -17,8 +17,10 @@ export SymSemiseparableMatrix,
 include("adjointoperator.jl")
 
 # Matrices
-include("matrices/symegrss.jl")
-include("matrices/symegrsscholesky.jl")
+include("matrices/symsep.jl")
+include("matrices/symsepchol.jl")
+include("matrices/diasymsep.jl")
+include("matrices/diasymsepchol.jl")
 
 include("syntax.jl")
 
@@ -26,10 +28,10 @@ include("syntax.jl")
 SymSemiseparableChol(K::SymSemiseparable) = SymSemiseparableChol(K.n, K.p, K.U, ss_create_w(K.U, K.V))
 # EGRSSMatrix(L::EGRSSCholesky) = EGRSSMatrix(  L.n, L.p, L.U, ss_create_v(L.U, L.W))
 # EGRQSMatrix(L::EGRSSMatrix, d::AbstractArray) = EGRQSMatrix(L.n, L.p, L.U, L.V, d)
-# function EGRQSCholesky(L::EGRQSMatrix)
-#       W, dbar = dss_create_wdbar(L.U, L.V, L.d)
-#       EGRQSCholesky(L.n, L.p, L.U, W, dbar)
-# end
+function DiaSymSemiseparableChol(L::DiaSymSemiseparable)
+      W, dbar = dss_create_wdbar(L.U, L.V, L.d)
+      DiaSymSemiseparableChol(L.n, L.p, L.U, W, dbar)
+end
 # function EGRQSMatrix(L::EGRQSCholesky)
 #       V, d = dss_create_vd(L.U, L.W, L.ds);
 #       EGRQSMatrix(  L.n, L.p, L.U, V, d)
