@@ -5,7 +5,6 @@ t = Vector(0.1:0.1:1)
 n = length(t);
 
 # Creating a test matrix Σ = tril(UV') + triu(VU',1) that is PSD
-#  using the spline kernel
 p = 2;
 U, V = spline_kernel(t, p);
 Σ    = spline_kernel_matrix(U, V);
