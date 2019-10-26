@@ -4,3 +4,6 @@
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/mipals/SymSemiseparableMatrices.jl?svg=true)](https://ci.appveyor.com/project/mipals/SymSemiseparableMatrices-jl)
 [![Codecov](https://codecov.io/gh/mipals/SymSemiseparableMatrices.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/mipals/SymSemiseparableMatrices.jl)
 [![Coveralls](https://coveralls.io/repos/github/mipals/SymSemiseparableMatrices.jl/badge.svg?branch=master)](https://coveralls.io/github/mipals/SymSemiseparableMatrices.jl?branch=master)
+
+
+[img]http://www.sciweavers.org/tex2img.php?eq=K%20%3D%20%5Ctext%7B%5Ctextbf%7Btril%7D%7D%28UV%5ET%29%20%2B%20%5Ctext%7B%5Ctextbf%7Btriu%7D%7D%28VU%5ET%2C1%29&bc=White&fc=Black&im=png&fs=12&ff=arev&edit=0[/img]
