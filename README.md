@@ -20,8 +20,8 @@ All implemented algorithms (multiplication, Cholesky factorization, forward/back
 First we need to create generators U and V that represent the symmetric matrix, ```K = tril(UV') + triu(VU',1)``` as well a test vector ```x```.
 ```julia
 julia> U, V = spline_kernel(Vector(0.1:0.01:1), 2); # Creating input such that K is positive definite
-       K = SymSemiseparable(U,V); # Symmetric generator representable semiseparable matrix
-       x = ones(K.n); # Test vector
+julia> K = SymSemiseparable(U,V); # Symmetric generator representable semiseparable matrix
+julia> x = ones(K.n); # Test vector
 ```
 We can now compute products with ```K``` and ```K'```. The result are the same as ```K``` is symmetric.
 ```julia
