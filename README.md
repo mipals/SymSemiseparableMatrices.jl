@@ -17,8 +17,8 @@ as well as
 All implemented algorithms (multiplication, Cholesky factorization, forward/backward substitution as well as various traces and determinants) run linear in time and memory using the structure of the two matrix types.
 
 ## Benchmarks
-![Scaling of the Cholesky factorization of an EGRSS matrix](https://i.imgur.com/KQi9xvq.png)
-![Scaling of the Cholesky factorization of an EGRQS matrix](https://i.imgur.com/KWkLO5A.png)
+![Scaling of the Cholesky factorization of an EGRSS matrix](https://i.imgur.com/NFqfreO.png)
+![Scaling of the Cholesky factorization of an EGRQS matrix](https://i.imgur.com/IuupJSP.png)
 
 ## Usage
 ```julia
