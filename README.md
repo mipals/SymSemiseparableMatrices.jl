@@ -59,6 +59,22 @@ julia> K'*x
  12.31510733333333   
  12.484138499999995  
  12.65317083333333  
+
+julia> K*(K\x)
+91×1 Array{Float64,2}:
+ 1.0000000000000036
+ 0.9999999999999982
+ 0.9999999999999956
+ 0.9999999999999944
+ 0.9999999999999951
+ 0.999999999999995 
+ ⋮                 
+ 0.9999999999996279
+ 0.9999999999996153
+ 0.9999999999996028
+ 0.9999999999995898
+ 0.9999999999995764
+ 
 ```
 
 Furthermore from the ```SymSemiseparable``` structure we can efficiently calculate the Cholesky factorization as
@@ -66,37 +82,4 @@ Furthermore from the ```SymSemiseparable``` structure we can efficiently calcula
 julia> L = SymSemiseparableChol(K); # Computing the Cholesky factorization of K
 ```
 
-Compuatations with ```SymSemiseparableChol``` to that of ```SymSemiseparable```, with the addition that we can solve systems
-```julia 
-julia> L\x # Solving the linear system Ly = x using forward substitution
-91×1 Array{Float64,2}:
-  54.7722557505166    
- -89.11327886790265   
-  10.886919764067525  
-  -2.8333003949506765 
-   0.7576353467570383 
-  -0.20297814193537891
-   ⋮                  
-   0.0                
-   0.0                
-   0.0                
-   0.0                
-   0.0    
-
-julia> L'\x # Solving the linear system L'y = x using backward substitution
-91×1 Array{Float64,2}:
-   418.36207692212975   
-  -425.88322666332897   
-   -16.901230409582126  
-    -1.1766571103485641 
-    -0.0842960953287453 
-    -0.00605124109635233
-     ⋮                  
-    30.928656802447982  
-  -115.42731863148224   
-   430.78061801563183   
- -1607.6951543090788    
-  1267.9491923479509  
-
-```
-
+Compuatations with ```SymSemiseparableChol``` is similar to that of ```SymSemiseparable```
