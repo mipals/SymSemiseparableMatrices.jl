@@ -21,6 +21,10 @@ mul!(y::AbstractArray, L::SymSemiseparable, 		         x::AbstractArray) =
     ss_mul_mat!(y, L.U, L.V, x);
 mul!(y::AbstractArray, L::AdjointOperator{SymSemiseparable}, x::AbstractArray) =
     ss_mul_mat!(y, L.A.U, L.A.V, x);
+function inv!(y, K::SymSemiseparable, b::AbstractArray)
+	L = SymSemiseparableChol(K);
+	y[:,:] = L'\(L\b);
+end
 
 #####################################################################
 #### Extended generator representable {p}-semiseperable matrices ####
