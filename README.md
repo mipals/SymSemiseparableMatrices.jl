@@ -55,7 +55,7 @@ julia> K'*x
  12.484138499999995  
  12.65317083333333  
  
-julia> C = SymSemiseparableChol(K); # Creating Cholesky factorization
+julia> C = SymSemiseparableChol(K); # Computing the Cholesky factorization of K
 
 julia> C*x
 91×1 Array{Float64,2}:
