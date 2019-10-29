@@ -16,11 +16,6 @@ as well as
 
 All implemented algorithms (multiplication, Cholesky factorization, forward/backward substitution as well as various traces and determinants) run linear in time and memory using the structure of the two matrix types.
 
-## Benchmarks
-![Scaling of the Cholesky factorization of an EGRSS matrix](https://i.imgur.com/NFqfreO.png)
-![Scaling of the Cholesky factorization of an EGRQS matrix](https://i.imgur.com/IuupJSP.png)
-![Solving a system using the implicit Cholesky factorization](https://i.imgur.com/mYBNTSr.png)
-
 ## Usage
 First we need to create generators U and V that represent the symmetric matrix, ```K = tril(UV') + triu(VU',1)``` as well a test vector ```x```.
 ```julia
@@ -90,3 +85,10 @@ julia> U, V = spline_kernel(Vector(0.1:0.01:1), 2); # Creating input such that K
        K = DiaSymSemiseparable(U,V,rand(size(U,1)); # Symmetric generator representable semiseparable matrix + diagonal
 ```
 The Cholesky factorization of this matrix can be computed using ```DiaSymSemiseparableChol```.
+
+## Benchmarks
+![Scaling of the Cholesky factorization of an EGRSS matrix](https://i.imgur.com/NFqfreO.png)
+![Scaling of the Cholesky factorization of an EGRQS matrix](https://i.imgur.com/IuupJSP.png)
+![Solving a system using the implicit Cholesky factorization](https://i.imgur.com/mYBNTSr.png)
+
+## Credits
