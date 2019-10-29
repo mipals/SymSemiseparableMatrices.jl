@@ -21,11 +21,56 @@ All algorithms run linear in time and memory.
 
 ## Usage
 ```julia
-julia> U = randn(100,5); V = randn(100,5); # Input generators
+julia> U, V = spline_kernel(Vector(0.1:0.01:1), 2); # Creating Input Generators resulting in a PSD K
        K = SymSemiseparable(U,V); # Generator symmetric semiseparable matrix
-       Kdense = tril(U*V') + triu(V*U',1); # Dense representation of K
        x = randn(K.n); # Test vector
 
-julia> isapprox(K*x, Kfull*x)
-true
+julia> K*x
+91×1 Array{Float64,2}:
+ 0.022130515139445125
+ 0.02664591885220869 
+ 0.03155342492923217 
+ 0.036844740234393235
+ 0.042510687723554076
+ 0.04854178529350316 
+ ⋮                   
+ 1.0325584513139785  
+ 1.04560463294564    
+ 1.0586490423718034  
+ 1.0716922443898413  
+ 1.084734997206852 
+
+julia> K'*x
+91×1 Array{Float64,2}:
+ 0.022130515139445125
+ 0.02664591885220869 
+ 0.03155342492923217 
+ 0.036844740234393235
+ 0.042510687723554076
+ 0.04854178529350316 
+ ⋮                   
+ 1.0325584513139785  
+ 1.04560463294564    
+ 1.0586490423718034  
+ 1.0716922443898413  
+ 1.084734997206852  
+ 
+julia> C = SymSemiseparableChol(K); # Creating Cholesky factorization
+
+julia> C*x
+91×1 Array{Float64,2}:
+ -0.0001513784679157495
+ -0.0033721574853975977
+ -0.007539443015350353 
+ -0.011630949702727003 
+ -0.017427452569431    
+ -0.023884126411113746 
+  ⋮                    
+  0.0365491720167882   
+  0.04207182404677595  
+  0.04793612679856907  
+  0.053440596354975445 
+  0.05854569154059269  
+
 ```
+
