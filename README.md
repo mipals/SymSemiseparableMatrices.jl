@@ -24,7 +24,7 @@ All implemented algorithms run linear in time and memory.
 ```julia
 julia> U, V = spline_kernel(Vector(0.1:0.01:1), 2); # Creating input such that K is positive definite
        K = SymSemiseparable(U,V); # Symmetric generator representable semiseparable matrix
-       x = randn(K.n); # Test vector
+       x = ones(K.n); # Test vector
 
 julia> K*x
 91×1 Array{Float64,2}:
