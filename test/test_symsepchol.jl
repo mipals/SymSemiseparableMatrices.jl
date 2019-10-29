@@ -15,7 +15,7 @@ K  = SymSemiseparable(U,V)
 # Calculating its Cholesky factorization
 Km = SymSemiseparableChol(K)
 # Creating a test vector
-xt = randn(n,1);
+xt = randn(n);
 
 # Testing multiplication
 @test isapprox(Km*xt, chol.L*xt, atol=1e-6)

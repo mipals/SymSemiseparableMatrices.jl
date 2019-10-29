@@ -15,7 +15,7 @@ K  = DiaSymSemiseparable(U,V,ones(n))
 # Calculating its Cholesky factorization
 Km = DiaSymSemiseparableChol(K)
 # Creating a test vector
-xt = randn(n,1);
+xt = randn(n);
 
 # Testing multiplication
 @test isapprox(Km*xt, chol.L*xt, atol=1e-6)

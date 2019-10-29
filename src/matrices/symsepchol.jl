@@ -74,8 +74,9 @@ end
 function ssa_tri_mul!(Y::AbstractArray,U::AbstractArray,
                       W::AbstractArray,X::AbstractArray)
      n, m = size(U);
-     #mx = size(X,2);
-     Ubar = U'*X;
+	 mx = size(X,2);
+     Ubar = zeros(m,mx);
+     Ubar = Ubar + U'*X;
      for i = 1:n
          tmpW = W[i,:]
          tmpU = U[i,:]

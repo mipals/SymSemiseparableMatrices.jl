@@ -4,7 +4,7 @@ p = 5;
 U = randn(n,p);
 V = randn(n,p);
 K = SymSemiseparable(U,V);
-x = randn(n);
+x = randn(K.n);
 Kfull = tril(U*V') + triu(V*U',1);
 
 # Testing multiplication
