@@ -69,7 +69,6 @@ julia> K*(K\x)
  0.9999999999996028
  0.9999999999995898
  0.9999999999995764
- 
 ```
 
 Furthermore from the ```SymSemiseparable``` structure we can efficiently calculate the Cholesky factorization as
