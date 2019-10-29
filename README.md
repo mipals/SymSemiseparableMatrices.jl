@@ -17,7 +17,7 @@ as well as
 All algorithms run linear in time and memory.
 
 ## Benchmarks
-
+![Image of Yaktocat](https://octodex.github.com/images/yaktocat.png)
 
 ## Usage
 ```julia
