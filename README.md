@@ -22,11 +22,14 @@ All implemented algorithms (multiplication, Cholesky factorization, forward/back
 ![Solving a system using the implicit Cholesky factorization](https://i.imgur.com/mYBNTSr.png)
 
 ## Usage
+First we need to create generators U and V that represent the symmetric matrix, ```K = tril(UV') + triu(VU',1)``` as well a test vector ```x```.
 ```julia
 julia> U, V = spline_kernel(Vector(0.1:0.01:1), 2); # Creating input such that K is positive definite
        K = SymSemiseparable(U,V); # Symmetric generator representable semiseparable matrix
        x = ones(K.n); # Test vector
-
+```
+We can now compute products with ```K``` and ```K'```. The result are the same as ```K``` is symmetric.
+```julia
 julia> K*x
 91×1 Array{Float64,2}:
   0.23508333333333334
@@ -56,40 +59,16 @@ julia> K'*x
  12.31510733333333   
  12.484138499999995  
  12.65317083333333  
- 
-julia> C = SymSemiseparableChol(K); # Computing the Cholesky factorization of K
+```
 
-julia> C*x
-91×1 Array{Float64,2}:
- 0.01825741858350554 
- 0.022679282194091675
- 0.02801063125252222 
- 0.034337798127754324
- 0.04166467105450973 
- 0.04999152290835254 
- ⋮                   
- 4.045466391180396   
- 4.135793241404395   
- 4.227120091628391   
- 4.319446941852434   
- 4.412773792076479 
+Furthermore from the ```SymSemiseparable``` structure we can efficiently calculate the Cholesky factorization as
+```julia 
+julia> L = SymSemiseparableChol(K); # Computing the Cholesky factorization of K
+```
 
-julia> C'*x
-91×1 Array{Float64,2}:
- 12.876044456017281    
-  7.289466211394393    
-  4.0512284860239625   
-  3.9017442701099254   
-  3.8099183427776646   
-  3.722847360707153    
-  ⋮                    
-  0.013943375672876068 
-  0.009154700538161198 
-  0.005366025403634955 
-  0.0025773502691179007
-  0.0007886751346461718
-
-julia> C\x # Solving the linear system Cy = x using forward substitution
+Compuatations with ```SymSemiseparableChol``` to that of ```SymSemiseparable```, with the addition that we can solve systems
+```julia 
+julia> L\x # Solving the linear system Ly = x using forward substitution
 91×1 Array{Float64,2}:
   54.7722557505166    
  -89.11327886790265   
@@ -104,7 +83,7 @@ julia> C\x # Solving the linear system Cy = x using forward substitution
    0.0                
    0.0    
 
-julia> C'\x # Solving the linear system C'y = x using backward substitution
+julia> L'\x # Solving the linear system L'y = x using backward substitution
 91×1 Array{Float64,2}:
    418.36207692212975   
   -425.88322666332897   
