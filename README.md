@@ -19,6 +19,7 @@ All implemented algorithms (multiplication, Cholesky factorization, forward/back
 ## Benchmarks
 ![Scaling of the Cholesky factorization of an EGRSS matrix](https://i.imgur.com/NFqfreO.png)
 ![Scaling of the Cholesky factorization of an EGRQS matrix](https://i.imgur.com/IuupJSP.png)
+![Solving a system using the implicit Cholesky factorization](https://i.imgur.com/mYBNTSr.png)
 
 ## Usage
 ```julia
