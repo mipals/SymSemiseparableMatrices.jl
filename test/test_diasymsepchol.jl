@@ -10,22 +10,24 @@ U, V = spline_kernel(t, p);
 Σ    = spline_kernel_matrix(U, V) + I;
 chol = cholesky(Σ)
 
-# Creating a symmetric extended generator representable semiseperable matrix
+# Creating a symmetric exended generator representable semiseperable matrix
 K  = DiaSymSemiseparable(U,V,ones(n))
 # Calculating its Cholesky factorization
-Km = DiaSymSemiseparableChol(K)
+L = DiaSymSemiseparableChol(K)
 # Creating a test vector
-xt = randn(n);
+x = randn(n);
 
 # Testing multiplication
-@test isapprox(Km*xt, chol.L*xt, atol=1e-6)
-@test isapprox(Km'*xt, chol.U*xt, atol=1e-6)
+@test isapprox(L*x, chol.L*x, atol=1e-6)
+@test isapprox(L'*x, chol.U*x, atol=1e-6)
 
 # Testing inverses (Using Cholesky factorizations)
-@test isapprox(Km'\(Km\xt), chol.U\(chol.L\xt), atol=1e-6)
-@test isapprox(inv(Km), chol.U\(chol.L\Diagonal(ones(K.n))), atol=1e-6)
-@test isapprox(inv(Km,xt),  chol.U\(chol.L\xt), atol=1e-6)
+@test isapprox(L'\(L\x), chol.U\(chol.L\x), atol=1e-6)
+@test isapprox(inv(L), chol.U\(chol.L\Diagonal(ones(K.n))), atol=1e-6)
+@test isapprox(inv(L,x),  chol.U\(chol.L\x), atol=1e-6)
+@test isapprox(K*(K\x), x)
+@test isapprox(K'*(K'\x), x)
 
 # Testing logdet
-@test isapprox(logdet(Km), logdet(chol.L), atol=1e-10)
-@test isapprox(logdet(Km'), logdet(chol.U), atol=1e-10)
+@test isapprox(logdet(L), logdet(chol.L), atol=1e-10)
+@test isapprox(logdet(L'), logdet(chol.U), atol=1e-10)

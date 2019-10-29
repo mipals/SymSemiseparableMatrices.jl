@@ -19,7 +19,14 @@ end
 # Mappings
 mul!(y::AbstractArray, L::DiaSymSemiseparable, 		            b::AbstractArray) = dss_mul_mat!(y, L.U, L.V, L.d, b);
 mul!(y::AbstractArray, L::AdjointOperator{DiaSymSemiseparable}, b::AbstractArray) = dss_mul_mat!(y, L.A.U, L.A.V, L.A.d, b);
-
+function inv!(y, K::DiaSymSemiseparable, b::AbstractArray)
+	L = DiaSymSemiseparableChol(K)
+	y[:,:] = L'\(L\b)
+end
+function inv!(y, K::AdjointOperator{DiaSymSemiseparable}, b::AbstractArray)
+	L = DiaSymSemiseparableChol(K.A)
+	y[:,:] = L'\(L\b)
+end
 
 #################################################
 #### Cholesky factoriaztion of:              ####
