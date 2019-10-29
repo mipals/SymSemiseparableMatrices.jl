@@ -17,7 +17,8 @@ as well as
 All algorithms run linear in time and memory.
 
 ## Benchmarks
-![Scaling of the Cholesky factorization of an EGRSS matrix](https://i.imgur.com/KWkLO5A.png)
+![Scaling of the Cholesky factorization of an EGRSS matrix](https://i.imgur.com/KQi9xvq.png)
+![Scaling of the Cholesky factorization of an EGRQS matrix](https://i.imgur.com/KWkLO5A.png)
 
 ## Usage
 ```julia
