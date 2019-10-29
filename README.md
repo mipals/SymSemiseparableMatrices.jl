@@ -17,7 +17,7 @@ as well as
 All algorithms run linear in time and memory.
 
 ## Benchmarks
-![Image of Yaktocat](https://octodex.github.com/images/yaktocat.png)
+![Scaling of the Cholesky factorization of an EGRSS matrix](https://www.dropbox.com/s/kidp87fgk9ro2d4/egrqs_cholesky.png?dl=0)
 
 ## Usage
 ```julia
