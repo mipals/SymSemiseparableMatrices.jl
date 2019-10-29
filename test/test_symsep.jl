@@ -13,5 +13,6 @@ Kfull = tril(U*V') + triu(V*U',1);
 @test isapprox(K*x, Kfull*x, atol = 1e-6)
 # Testing multiplication with the adjoint operator
 @test isapprox(K'*x, Kfull'*x, atol = 1e-6)
-# Testing inverse
+# Testing linear solves
 @test isapprox(K*(K\x),x, atol=1e-6)
+@test isapprox(K'*(K'\x),x, atol=1e-6)

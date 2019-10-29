@@ -25,6 +25,10 @@ function inv!(y, K::SymSemiseparable, b::AbstractArray)
 	L = SymSemiseparableChol(K);
 	y[:,:] = L'\(L\b);
 end
+function inv!(y, K::AdjointOperator{SymSemiseparable}, b::AbstractArray)
+	L = SymSemiseparableChol(K.A);
+	y[:,:] = L'\(L\b);
+end
 
 #####################################################################
 #### Extended generator representable {p}-semiseperable matrices ####
