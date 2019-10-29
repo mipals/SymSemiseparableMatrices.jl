@@ -14,7 +14,7 @@ as well as
 
 <img src="https://latex.codecogs.com/svg.latex?\dpi{100}&space;K=\text{\textbf{tril}}(UV^T)&space;&plus;&space;\text{\textbf{tril}}(VU^T,1)&space;&plus;&space;\text{\textbf{diag}}(d)" title="K=\text{\textbf{tril}}(UV^T) + \text{\textbf{tril}}(VU^T,1) + \text{\textbf{diag}}(d)" />
 
-All implemented algorithms run linear in time and memory.
+All implemented algorithms (multiplication, Cholesky factorization, forward/backward substitution and various traces and determinants) run linear in time and memory using the structure of the two matrix types.
 
 ## Benchmarks
 ![Scaling of the Cholesky factorization of an EGRSS matrix](https://i.imgur.com/KQi9xvq.png)
