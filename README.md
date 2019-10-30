@@ -75,7 +75,7 @@ Furthermore from the ```SymSemiseparable``` structure we can efficiently compute
 ```julia 
 julia> L = SymSemiseparableChol(K); # Computing the Cholesky factorization of K
 ```
-Where ```L``` now represents a Cholesky factorization with the form ```L = tril(UW')```. Computations with ```SymSemiseparableChol``` is similar to that of ```SymSemiseparable```
+Now ```L``` represents a Cholesky factorization with the form ```L = tril(UW')```. Computations with ```SymSemiseparableChol``` can be performed similar to that of ```SymSemiseparable```. The simple structure gives rise to linear (time and storage) algorithms for solving linear systems of equations.
 
 A struct for the dealing with symmetric matrices of the form, ```K = tril(UV') + triu(VU',1) + diag(d)``` called ```DiaSymSemiseparable``` is also implemented. The usage is similar to that of ```SymSemiseparable``` and can be created as follows
 ```julia
