@@ -90,7 +90,7 @@ The Cholesky factorization of this matrix can be computed using ```DiaSymSemisep
 ![Scaling of the Cholesky factorization of an EGRSS matrix](https://i.imgur.com/NFqfreO.png)
 ### Computing Cholesky factorization of ```K = tril(UV') + triu(VU',1) + diag(d)```
 ![Scaling of the Cholesky factorization of an EGRQS matrix](https://i.imgur.com/IuupJSP.png)
-### Solving linear systems using a Cholesky factorization with the form ```K = tril(UW')```
+### Solving linear systems using a Cholesky factorization with the form ```L = tril(UW')```
 ![Solving a system using the implicit Cholesky factorization](https://i.imgur.com/mYBNTSr.png)
 
 ## Credits
