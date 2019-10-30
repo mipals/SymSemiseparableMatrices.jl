@@ -37,12 +37,12 @@ function DiaSymSemiseparable(L::DiaSymSemiseparableChol)
       return DiaSymSemiseparable(L.n, L.p, L.U, V, d)
 end
 
-# function EGRQSCholesky(U::AbstractArray, V::AbstractArray, σn, σf)
-#       n, p = size(U)
-#       W, dbar = dss_create_wdbar(σf*U, σf*V, ones(n)*σn^2)
-#       EGRQSCholesky(n, p, σf*U, W, dbar)
-# end
-#
+function DiaSymSemiseparableChol(U::AbstractArray, V::AbstractArray, σn, σf)
+      n, p = size(U)
+      W, dbar = dss_create_wdbar(σf*U, σf*V, ones(n)*σn^2)
+      DiaSymSemiseparableChol(n, p, σf*U, W, dbar)
+end
+
 # # Syntax
 #
 # # 2D tensor algorithms

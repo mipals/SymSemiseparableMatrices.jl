@@ -9,4 +9,3 @@ end
 
 # Constructor
 AdjointOperator(L::AdjointOperator) = AdjointOperator(L)
-#adjoint(L::T) where {T <: SymSemiseparableMatrix} = AdjointOperator(L)
