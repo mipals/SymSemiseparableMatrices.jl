@@ -93,4 +93,5 @@ The Cholesky factorization of this matrix can be computed using ```DiaSymSemisep
 ### Solving linear systems using a Cholesky factorization with the form ```L = tril(UW')```
 ![Solving a system using the implicit Cholesky factorization](https://i.imgur.com/mYBNTSr.png)
 
-## Credits
+## References
+
