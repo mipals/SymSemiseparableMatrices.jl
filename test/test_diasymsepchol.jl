@@ -35,6 +35,9 @@ x = randn(n);
 # Testing trace
 @test isapprox(tr(L), tr(chol.L))
 
+# Testing using the SymSemiseparableChol struct as a lower triangular matrix
+C = DiaSymSemiseparableChol(U,V,ones(K.n));
+@test isapprox(C*x, (tril(U*V',-1) + I)*x)
 
 
 
