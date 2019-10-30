@@ -1,4 +1,4 @@
-export DiaSymSemiseparableChol
+export DiaSymSemiseparableChol, trinv
 
 struct DiaSymSemiseparableChol <: SymSemiseparableCholesky
     n::Int64
@@ -32,11 +32,11 @@ function fro_norm_L(L::DiaSymSemiseparableChol)
 	return sum(squared_norm_cols(L.U, L.W, L.ds))
 end
 
-# function tr(L::DiaSymSemiseparableChol)
-# 	dbar = L.ds;
-# 	Y, Z = dss_create_yz(L.U, L.W, dbar)
-# 	return sum(squared_norm_cols(Y,Z, dbar.^(-1)))
-# end
+function trinv(L::DiaSymSemiseparableChol)
+	dbar = L.ds;
+	Y, Z = dss_create_yz(L.U, L.W, dbar)
+	return sum(squared_norm_cols(Y,Z, dbar.^(-1)))
+end
 function tr(L::DiaSymSemiseparableChol)
 	return sum(L.ds)
 end

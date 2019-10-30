@@ -32,8 +32,13 @@ x = randn(n);
 @test isapprox(logdet(L), logdet(chol.L), atol=1e-10)
 @test isapprox(logdet(L'), logdet(chol.U), atol=1e-10)
 
-# Testing trace
-@test isapprox(tr(L), tr(chol.L))
+# Testing traces
+@test isapprox(tr(L), tr(chol.L)) # Trace of L
+@test isapprox(trinv(L), tr(chol\Diagonal(ones(K.n)))) # Trace of (K+D)^(-1)
+D = SymSemiseparable(U,V);
+@test isapprox(tr(L,D), tr(chol\spline_kernel_matrix(U, V))) # Trace of (K+D)^(-1)K
+
+
 
 # Testing using the SymSemiseparableChol struct as a lower triangular matrix
 C = DiaSymSemiseparableChol(U,V,ones(K.n));
