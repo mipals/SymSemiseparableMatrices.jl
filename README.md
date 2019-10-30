@@ -71,19 +71,18 @@ julia> K*(K\x)
  0.9999999999995764
 ```
 
-Furthermore from the ```SymSemiseparable``` structure we can efficiently calculate the Cholesky factorization as
+Furthermore from the ```SymSemiseparable``` structure we can efficiently compute the Cholesky factorization as
 ```julia 
 julia> L = SymSemiseparableChol(K); # Computing the Cholesky factorization of K
 ```
-
-Compuatations with ```SymSemiseparableChol``` is similar to that of ```SymSemiseparable```
+Where ```L``` now represents a Cholesky factorization with the form ```L = tril(UW')```. Computations with ```SymSemiseparableChol``` is similar to that of ```SymSemiseparable```
 
 A struct for the dealing with symmetric matrices of the form, ```K = tril(UV') + triu(VU',1) + diag(d)``` called ```DiaSymSemiseparable``` is also implemented. The usage is similar to that of ```SymSemiseparable``` and can be created as follows
 ```julia
 julia> U, V = spline_kernel(Vector(0.1:0.01:1), 2); # Creating input such that K is positive definite
        K = DiaSymSemiseparable(U,V,rand(size(U,1)); # Symmetric generator representable semiseparable matrix + diagonal
 ```
-The Cholesky factorization of this matrix can be computed using ```DiaSymSemiseparableChol```.
+The Cholesky factorization of this matrix can be computed using ```DiaSymSemiseparableChol```. Note however here that ```L``` represents a matrix of the form ```L = tril(UW',-1) + diag(c)```
 
 ## Benchmarks
 ### Computing Cholesky factorization of ```K = tril(UV') + triu(VU',1)```
