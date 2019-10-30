@@ -13,7 +13,7 @@ K = SymSemiseparable(U,V)
 # Calculating its Cholesky factorization
 L = SymSemiseparableChol(K)
 # Creating a test vector
-xt = randn(K.n);
+xt = ones(K.n);
 
 # Testing multiplication
 @test isapprox(L*xt, chol.L*xt, atol=1e-6)
@@ -27,3 +27,11 @@ xt = randn(K.n);
 # Testing logdet
 @test isapprox(logdet(L), logdet(chol.L), atol=1e-10)
 @test isapprox(logdet(L'), logdet(chol.U), atol=1e-10)
+
+# Testing the Cholesky as a lower triangular matrix
+C = SymSemiseparableChol(U,V);
+@test isapprox(C*xt, tril(U*V')*xt)
+
+# Testing going from Cholesky back to the matrix K
+Kl = SymSemiseparable(L)
+@test isapprox(K*x, Kl*x)

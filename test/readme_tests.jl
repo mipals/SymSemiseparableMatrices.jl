@@ -19,5 +19,4 @@ L'*x
 L\x
 L'\x
 
-
 Kdiag = DiaSymSemiseparable(U,V,rand(size(U,1)))

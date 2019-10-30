@@ -24,18 +24,19 @@ include("matrices/diasymsepchol.jl")
 
 include("syntax.jl")
 
-# # More constructors
+# More constructors
 SymSemiseparableChol(K::SymSemiseparable) = SymSemiseparableChol(K.n, K.p, K.U, ss_create_w(K.U, K.V))
-# EGRSSMatrix(L::EGRSSCholesky) = EGRSSMatrix(  L.n, L.p, L.U, ss_create_v(L.U, L.W))
-# EGRQSMatrix(L::EGRSSMatrix, d::AbstractArray) = EGRQSMatrix(L.n, L.p, L.U, L.V, d)
+SymSemiseparable(L::SymSemiseparableChol) = SymSemiseparable(L.n, L.p, L.U, ss_create_v(L.U, L.W))
+DiaSymSemiseparable(L::SymSemiseparable, d::AbstractArray) = DiaSymSemiseparable(L.n, L.p, L.U, L.V, d)
 function DiaSymSemiseparableChol(L::DiaSymSemiseparable)
       W, dbar = dss_create_wdbar(L.U, L.V, L.d)
-      DiaSymSemiseparableChol(L.n, L.p, L.U, W, dbar)
+      return DiaSymSemiseparableChol(L.n, L.p, L.U, W, dbar)
 end
-# function EGRQSMatrix(L::EGRQSCholesky)
-#       V, d = dss_create_vd(L.U, L.W, L.ds);
-#       EGRQSMatrix(  L.n, L.p, L.U, V, d)
-# end
+function DiaSymSemiseparable(L::DiaSymSemiseparableChol)
+      V, d = dss_create_vd(L.U, L.W, L.ds);
+      return DiaSymSemiseparable(L.n, L.p, L.U, V, d)
+end
+
 # function EGRQSCholesky(U::AbstractArray, V::AbstractArray, σn, σf)
 #       n, p = size(U)
 #       W, dbar = dss_create_wdbar(σf*U, σf*V, ones(n)*σn^2)

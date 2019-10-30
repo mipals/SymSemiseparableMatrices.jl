@@ -24,10 +24,23 @@ x = randn(n);
 # Testing inverses (Using Cholesky factorizations)
 @test isapprox(L'\(L\x), chol.U\(chol.L\x), atol=1e-6)
 @test isapprox(inv(L), chol.U\(chol.L\Diagonal(ones(K.n))), atol=1e-6)
-@test isapprox(inv(L,x),  chol.U\(chol.L\x), atol=1e-6)
+@test isapprox(inv(L,x), chol.U\(chol.L\x), atol=1e-6)
 @test isapprox(K*(K\x), x)
 @test isapprox(K'*(K'\x), x)
 
 # Testing logdet
 @test isapprox(logdet(L), logdet(chol.L), atol=1e-10)
 @test isapprox(logdet(L'), logdet(chol.U), atol=1e-10)
+
+# Testing trace
+@test isapprox(tr(L), tr(chol.L))
+
+
+
+
+#@test isapprox(fro_norm_L(L),tr(Σ))
+
+
+# Testing going back
+#Kl = DiaSymSemiseparable(L)
+#@test isapprox(Kl*x, K*x)
