@@ -38,17 +38,6 @@ x = randn(n);
 D = SymSemiseparable(U,V);
 @test isapprox(tr(L,D), tr(chol\spline_kernel_matrix(U, V))) # Trace of (K+D)^(-1)K
 
-
-
 # Testing using the SymSemiseparableChol struct as a lower triangular matrix
 C = DiaSymSemiseparableChol(U,V,ones(K.n));
 @test isapprox(C*x, (tril(U*V',-1) + I)*x)
-
-
-
-#@test isapprox(fro_norm_L(L),tr(Σ))
-
-
-# Testing going back
-#Kl = DiaSymSemiseparable(L)
-#@test isapprox(Kl*x, K*x)

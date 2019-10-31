@@ -28,15 +28,6 @@ function inv!(y, K::AdjointOperator{DiaSymSemiseparable}, b::AbstractArray)
 	y[:,:] = L'\(L\b)
 end
 
-# Traces
-# function tr2(K::DiaSymSemiseparable)
-# 	s = 0.0;
-# 	for i = 1:K.n
-# 		s += K.U[i,:]'*K.V[i,:];
-# 	end
-# 	return s
-# end
-
 #################################################
 #### Cholesky factoriaztion of:              ####
 ####    Higher-order quasiseparable matrices ####
