@@ -47,8 +47,6 @@ function tr(Ky::DiaSymSemiseparableChol, K::SymSemiseparable)
 	U = K.U;
 	V = K.V;
 	Y, Z = dss_create_yz(Ky.U, Ky.W, Ky.ds);
-	# This line is not used?
-	#Linv = EGRQSCholesky(Y, Z, c.^(-1));
 	b = 0;
 	P = zeros(p,p);
 	R = zeros(p,p);

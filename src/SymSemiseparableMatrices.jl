@@ -43,8 +43,6 @@ function DiaSymSemiseparableChol(U::AbstractArray, V::AbstractArray, σn, σf)
       DiaSymSemiseparableChol(n, p, σf*U, W, dbar)
 end
 
-# # Syntax
-#
 # # 2D tensor algorithms
 # include("algorithms/tensor_kernel.jl")
 # include("operators/tensorkernel.jl")

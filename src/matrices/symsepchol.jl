@@ -65,7 +65,6 @@ function ss_tri_mul!(Y::AbstractArray,U::AbstractArray,
          tmpW   = W[i,:]
          tmpU   = U[i,:]
          tmpX   = X[i:i,:]
-         #Vbar += tmpV .* X[i:i,:];
          Wbar  += tmpW .* tmpX;
          Y[i,:] = Wbar'*tmpU;
      end
@@ -116,8 +115,6 @@ function ss_logdet(U::AbstractArray, W::AbstractArray)
     n = size(U, 1);
     a = 0;
     for i = 1:n
-        # Using the dot-functions such that the product
-        # becomes a scalar and not a 1x1 array
         a += log(dot(U[i,:],W[i,:]));
     end
     return a

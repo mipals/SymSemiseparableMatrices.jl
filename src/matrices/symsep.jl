@@ -43,8 +43,6 @@ function ss_mul_mat!(Y::AbstractArray, U::AbstractArray, V::AbstractArray, X::Ab
     for i = 1:n
         tmpV = V[i,:];
         tmpU = U[i,:];
-        #Ubar = broadcast!(+, Ubar, tmpU .* X[i:i,:]);
-        #Vbar = broadcast!(+, Vbar, tmpV .* X[i:i,:]);
         Ubar -= tmpU .* X[i:i,:];
         Vbar += tmpV .* X[i:i,:];
         Y[i,:] = Vbar'*tmpU + Ubar'*tmpV;
