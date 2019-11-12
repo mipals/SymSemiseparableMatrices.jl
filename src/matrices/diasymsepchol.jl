@@ -19,7 +19,7 @@ inv!(y::AbstractArray, L::AdjointOperator{DiaSymSemiseparableChol}, b::AbstractA
 newlogdet(L::DiaSymSemiseparableChol) = dss_logdet(L.ds)
 newlogdet(L::AdjointOperator{DiaSymSemiseparableChol}) = dss_logdet(L.A.ds)
 
-#### Inverse of a EGRQSCholesky using ####
+#### Inverse of a EGRQSCholesky using the Cholesky factorization ####
 function inv(L::DiaSymSemiseparableChol)
 	return L'\(L\Diagonal(ones(L.n)))
 end

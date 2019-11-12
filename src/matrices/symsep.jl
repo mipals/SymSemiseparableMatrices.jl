@@ -17,7 +17,7 @@ function SymSemiseparable(U::AbstractArray, V::AbstractArray)
 end
 
 # Mappings
-mul!(y::AbstractArray, L::SymSemiseparable, 		         x::AbstractArray) =
+mul!(y::AbstractArray, L::SymSemiseparable, x::AbstractArray) =
     ss_mul_mat!(y, L.U, L.V, x);
 mul!(y::AbstractArray, L::AdjointOperator{SymSemiseparable}, x::AbstractArray) =
     ss_mul_mat!(y, L.A.U, L.A.V, x);
