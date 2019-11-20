@@ -80,7 +80,7 @@ Now ```L``` represents a Cholesky factorization with the form ```L = tril(UW')``
 A struct for the dealing with symmetric matrices of the form, ```K = tril(UV') + triu(VU',1) + diag(d)``` called ```DiaSymSemiseparable``` is also implemented. The usage is similar to that of ```SymSemiseparable``` and can be created as follows
 ```julia
 julia> U, V = spline_kernel(Vector(0.1:0.01:1), 2); # Creating input such that K is positive definite
-       K = DiaSymSemiseparable(U,V,rand(size(U,1)); # Symmetric generator representable semiseparable matrix + diagonal
+julia> K = DiaSymSemiseparable(U,V,rand(size(U,1)); # Symmetric generator representable semiseparable matrix + diagonal
 ```
 The Cholesky factorization of this matrix can be computed using ```DiaSymSemiseparableChol```. Note however here that ```L``` represents a matrix of the form ```L = tril(UW',-1) + diag(c)```
 
