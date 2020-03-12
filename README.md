@@ -93,6 +93,6 @@ The Cholesky factorization of this matrix can be computed using ```DiaSymSemisep
 ![Solving a system using the implicit Cholesky factorization](https://i.imgur.com/mYBNTSr.png)
 
 ## References
-[1] M. S. Andersen and T. Chen. “Smoothing Splines and Rank Structured Matrices: Revisiting the Spline Kernel”. Manuscript submitted for publication. June 2019.
+[1] M. S. Andersen and T. Chen, “Smoothing Splines and Rank Structured Matrices: Revisiting the Spline Kernel,” SIAM Journal on Matrix Analysis and Applications, 2020.
 
 [2] J. Keiner. "Fast Polynomial Transforms." Logos Verlag Berlin, 2011.
