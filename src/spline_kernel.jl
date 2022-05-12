@@ -1,13 +1,3 @@
-function load_motor_data()
-    df = CSV.read("data/motor.csv");
-    x = df.times;
-    y = df.accel;
-    # Scaling the x-variables to lie in [0,1]
-    L = maximum(x) - minimum(x);
-    t = (x .- minimum(x))/L;
-    return x, y, t
-end
-
 function alpha(p::Int)
     a = zeros(p, 1);
     for i = 0:p-1
@@ -112,6 +102,3 @@ function create_T(t, m)
     end
     return T;
 end
-
-
-## Leave-one-out (LOO), what to do with explicit basis functions?

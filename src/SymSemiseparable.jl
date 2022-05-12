@@ -40,7 +40,7 @@ function ss_mul_mat!(Y::AbstractArray, U::AbstractArray, V::AbstractArray, X::Ab
     mx = size(X,2)
     Vbar = zeros(m,mx)
     Ubar = U'*X
-    for i = 1:n
+    @inbounds for i = 1:n
         tmpV = @view V[i,:]
         tmpU = @view U[i,:]
         Ubar -= tmpU .* X[i:i,:]
@@ -54,9 +54,9 @@ function ss_create_v(U::AbstractArray, W::AbstractArray)
     n,m = size(U)
     V = zeros(n,m)
     P = zeros(m,m)
-    for i = 1:n
-        tmpW = W[i,:]
-        tmpU = U[i,:]
+    @inbounds for i = 1:n
+        tmpW = @view W[i,:]
+        tmpU = @view U[i,:]
         tmpV = tmpW*(tmpU'*tmpW)
         V[i,:] = tmpV + P*tmpU
         P += tmpW*tmpW'

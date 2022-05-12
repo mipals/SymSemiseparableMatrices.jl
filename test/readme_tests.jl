@@ -1,6 +1,6 @@
 using SymSemiseparableMatrices
 using LinearAlgebra
-include("spline_kernel.jl")
+import SymSemiseparableMatrices: spline_kernel_matrix, spline_kernel
 
 U, V = spline_kernel(Vector(0.1:0.01:1), 2); # Creating Input Generators resulting in a PSD K
 K = SymSemiseparable(U,V); # Generator symmetric semiseparable matrix

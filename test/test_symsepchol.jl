@@ -1,5 +1,3 @@
-include("spline_kernel.jl")
-
 # Removing t = 0, such that Σ is invertible
 t = Vector(0.1:0.1:1); p = 2;
 

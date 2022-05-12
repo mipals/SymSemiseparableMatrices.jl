@@ -1,5 +1,3 @@
-include("spline_kernel.jl")
-
 # Removing t = 0, such that Σ is invertible
 t = Vector(0.1:0.1:1)
 n = length(t);
@@ -7,7 +5,7 @@ n = length(t);
 # Creating a test matrix Σ = tril(UV') + triu(VU',1) that is PSD
 p = 2;
 U, V = spline_kernel(t, p);
-Σ    = spline_kernel_matrix(U, V) + I;
+Σ    = spline_kernel_matrix(U, V) + I
 chol = cholesky(Σ)
 
 # Creating a symmetric exended generator representable semiseperable matrix

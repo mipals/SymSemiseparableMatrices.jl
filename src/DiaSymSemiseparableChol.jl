@@ -9,13 +9,23 @@ struct DiaSymSemiseparableChol <: SymSemiseparableCholesky
 end
 
 # Constuctors
-DiaSymSemiseparableChol(U::AbstractArray, W::AbstractArray, ds::AbstractArray) = DiaSymSemiseparableChol(size(U,1),size(U,2),U,W,ds);
+function DiaSymSemiseparableChol(U::AbstractArray, W::AbstractArray, ds::AbstractArray) 
+    return DiaSymSemiseparableChol(size(U,1),size(U,2),U,W,ds)
+end
 
 # Mappings
-mul!(y::AbstractArray, L::DiaSymSemiseparableChol, 		            b::AbstractArray) =   dss_tri_mul!(y, L.U,   L.W,   L.ds,   b);
-mul!(y::AbstractArray, L::AdjointOperator{DiaSymSemiseparableChol}, b::AbstractArray) =  dssa_tri_mul!(y, L.A.U, L.A.W, L.A.ds, b);
-inv!(y::AbstractArray, L::DiaSymSemiseparableChol, 		      		b::AbstractArray) =   dss_forward!(y, L.U,   L.W,   L.ds,   b);
-inv!(y::AbstractArray, L::AdjointOperator{DiaSymSemiseparableChol}, b::AbstractArray) =  dssa_backward!(y, L.A.U, L.A.W, L.A.ds, b);
+function mul!(y::AbstractArray, L::DiaSymSemiseparableChol, b::AbstractArray) 
+    dss_tri_mul!(y, L.U, L.W, L.ds, b)
+end
+function mul!(y::AbstractArray, L::AdjointOperator{DiaSymSemiseparableChol}, b::AbstractArray)
+    dssa_tri_mul!(y, L.A.U, L.A.W, L.A.ds, b)
+end
+function inv!(y::AbstractArray, L::DiaSymSemiseparableChol, b::AbstractArray) 
+    dss_forward!(y, L.U, L.W, L.ds, b)
+end
+function inv!(y::AbstractArray, L::AdjointOperator{DiaSymSemiseparableChol}, b::AbstractArray) 
+    dssa_backward!(y, L.A.U, L.A.W, L.A.ds, b)
+end
 newlogdet(L::DiaSymSemiseparableChol) = dss_logdet(L.ds)
 newlogdet(L::AdjointOperator{DiaSymSemiseparableChol}) = dss_logdet(L.A.ds)
 
@@ -47,7 +57,7 @@ function tr(Ky::DiaSymSemiseparableChol, K::SymSemiseparable)
 	U = K.U
 	V = K.V
 	Y, Z = dss_create_yz(Ky.U, Ky.W, Ky.ds)
-	b = 0
+	b = 0.0
 	P = zeros(p,p)
 	R = zeros(p,p)
 	@inbounds for k = 1:Ky.n
@@ -63,10 +73,9 @@ function tr(Ky::DiaSymSemiseparableChol, K::SymSemiseparable)
 	return b
 end
 
-
-########################################################################
-#### Cholesky factorization of Higher-order quasiseparable matrices ####
-########################################################################
+#===========================================================================================
+                Cholesky factorization of Higher-order quasiseparable matrices
+===========================================================================================#
 
 #### Creating W and ds s.t. L = tril(UW',-1) + diag(ds) ####
 function dss_create_wdbar(U::AbstractArray, V::AbstractArray, d::AbstractArray)

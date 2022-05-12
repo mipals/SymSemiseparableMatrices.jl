@@ -17,8 +17,12 @@ function DiaSymSemiseparable(U::AbstractArray, V::AbstractArray, d::AbstractArra
     end
 end
 # Mappings
-mul!(y::AbstractArray, L::DiaSymSemiseparable, 		            b::AbstractArray) = dss_mul_mat!(y, L.U, L.V, L.d, b);
-mul!(y::AbstractArray, L::AdjointOperator{DiaSymSemiseparable}, b::AbstractArray) = dss_mul_mat!(y, L.A.U, L.A.V, L.A.d, b);
+function mul!(y::AbstractArray, L::DiaSymSemiseparable, b::AbstractArray)
+    dss_mul_mat!(y, L.U, L.V, L.d, b)
+end
+function mul!(y::AbstractArray, L::AdjointOperator{DiaSymSemiseparable}, b::AbstractArray)
+    dss_mul_mat!(y, L.A.U, L.A.V, L.A.d, b)
+end
 function inv!(y, K::DiaSymSemiseparable, b::AbstractArray)
 	L = DiaSymSemiseparableChol(K)
 	y[:,:] = L'\(L\b)
@@ -28,11 +32,9 @@ function inv!(y, K::AdjointOperator{DiaSymSemiseparable}, b::AbstractArray)
 	y[:,:] = L'\(L\b)
 end
 
-#################################################
-#### Cholesky factoriaztion of:              ####
-####    Higher-order quasiseparable matrices ####
-#################################################
-
+#===========================================================================================
+                CCholesky factoriaztion of:  Higher-order quasiseparable matrices
+===========================================================================================#
 #### Matrix-matrix product ####
 function dss_mul_mat!(Y::Array, U::Array, V::Array, d::Array, X::Array)
     n, m = size(U)

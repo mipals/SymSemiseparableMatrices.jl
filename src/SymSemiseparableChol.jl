@@ -62,7 +62,7 @@ function ss_tri_mul!(Y::AbstractArray,U::AbstractArray,
     mx = size(X,2)
     Wbar = zeros(m,mx)
     @inbounds for i = 1:n
-        tmpW   = @view  W[i,:]
+        tmpW   = @view W[i,:]
         tmpU   = @view U[i,:]
         tmpX   = @view X[i:i,:]
         Wbar  += tmpW .* tmpX

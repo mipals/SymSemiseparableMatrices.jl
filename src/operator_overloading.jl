@@ -1,6 +1,3 @@
-import Base: adjoint, *, \
-import LinearAlgebra: logdet
-
 ###### ' ######
 adjoint(L::T) where {T <: SymSemiseparableMatrix} = AdjointOperator(L)
 

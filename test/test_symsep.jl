@@ -1,6 +1,3 @@
-# Creating a test problem
-include("spline_kernel.jl")
-
 # Creating generators U,V that result in a positive-definite matrix K
 t = Vector(0.1:0.1:1)
 n = length(t); p = 2;
