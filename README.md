@@ -1,7 +1,6 @@
 # SymSemiseparableMatrices.jl
 
-[![Build Status](https://github.com/mipals/SymSemiseparableMatrices.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/mipals/SymSemiseparableMatrices.jl/actions/workflows/CI.yml?query=branch%3Amain)
-[![Coverage](https://codecov.io/gh/mipals/SymSemiseparableMatrices.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/mipals/SymSemiseparableMatrices.jl)
+[![CI](https://github.com/mipals/SymSemiseparableMatrices.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/mipals/SymSemiseparableMatrices.jl/actions/workflows/CI.yml)
 
 ## Description
 A package for efficiently computing with symmetric extended generator representable semiseparable matrices and a variant thereof. In short this means matrices of the form
