@@ -41,23 +41,23 @@ function tr(L::DiaSymSemiseparableChol)
 	return sum(L.ds)
 end
 function tr(Ky::DiaSymSemiseparableChol, K::SymSemiseparable)
-	n = Ky.n;
-	p = Ky.p;
-	c = Ky.ds;
-	U = K.U;
-	V = K.V;
-	Y, Z = dss_create_yz(Ky.U, Ky.W, Ky.ds);
-	b = 0;
-	P = zeros(p,p);
-	R = zeros(p,p);
-	for k = 1:Ky.n
-		yk = Y[k,:];
-		zk = Z[k,:];
-		uk = U[k,:];
-		vk = V[k,:];
-		cki = c[k]^(-1);
-		b += yk'*P*yk + 2*yk'*R*uk*cki + uk'*vk*(cki^2);
-		P += ((uk'*vk)*zk)*zk' + zk*(R*uk)' + (R*uk)*zk';
+	n = Ky.n
+	p = Ky.p
+	c = Ky.ds
+	U = K.U
+	V = K.V
+	Y, Z = dss_create_yz(Ky.U, Ky.W, Ky.ds)
+	b = 0
+	P = zeros(p,p)
+	R = zeros(p,p)
+	@inbounds for k = 1:Ky.n
+		yk = @view Y[k,:]
+		zk = @view Z[k,:]
+		uk = @view U[k,:]
+		vk = @view V[k,:]
+		cki = c[k]^(-1)
+		b += yk'*P*yk + 2*yk'*R*uk*cki + uk'*vk*(cki^2)
+		P += ((uk'*vk)*zk)*zk' + zk*(R*uk)' + (R*uk)*zk'
 		R += zk*vk';
 	end
 	return b
@@ -70,60 +70,60 @@ end
 
 #### Creating W and ds s.t. L = tril(UW',-1) + diag(ds) ####
 function dss_create_wdbar(U::AbstractArray, V::AbstractArray, d::AbstractArray)
-    n, m = size(U);
-    P  = zeros(m, m);
-    W  = zeros(n, m);
-    dbar = zeros(n);
+    n, m = size(U)
+    P  = zeros(m, m)
+    W  = zeros(n, m)
+    dbar = zeros(n)
     for i = 1:n
-        tmpU  = U[i,:]
-        tmpW  = V[i,:] - P*tmpU;
-        tmpds = sqrt(tmpU'*tmpW + d[i]);
+        tmpU  = @ivew U[i,:]
+        tmpW  = V[i,:] - P*tmpU
+        tmpds = sqrt(tmpU'*tmpW + d[i])
         tmpW  = tmpW/tmpds
-        W[i,:] = tmpW;
-        dbar[i] = tmpds;
-        P += tmpW*tmpW';
+        W[i,:] = tmpW
+        dbar[i] = tmpds
+        P += tmpW*tmpW'
     end
     return W, dbar
 end
 #### Multiplying with Ld ####
 function dss_tri_mul!(Y::AbstractArray,U::AbstractArray,W::AbstractArray,
                      ds::AbstractArray,X::AbstractArray)
-     n, m = size(U)
-     mx = size(X, 2)
-     Wbar = zeros(m, mx)
-     for i = 1:n
-         tmpW = W[i,:]
-         tmpU = U[i,:]
-         tmpX = X[i:i,:];
-         Y[i,:] = tmpU'*Wbar + ds[i]*tmpX;
-         Wbar  +=  tmpW*tmpX;
-     end
+    n, m = size(U)
+    mx = size(X, 2)
+    Wbar = zeros(m, mx)
+    @inbounds for i = 1:n
+        tmpW = @view W[i,:]
+        tmpU = @view U[i,:]
+        tmpX = @view X[i:i,:]
+        Y[i,:] = tmpU'*Wbar + ds[i]*tmpX;
+        Wbar  +=  tmpW*tmpX;
+    end
 end
 #### Adjoint of Ld ####
 function dssa_tri_mul!(Y::AbstractArray,U::AbstractArray,W::AbstractArray,
                       ds::AbstractArray,X::AbstractArray)
-     n, m = size(U)
-     mx = size(X, 2)
-     Ubar = zeros(m,mx)
-     for i = n:-1:1
-         tmpW = W[i,:]
-         tmpU = U[i,:]
-         tmpX = X[i:i,:]
-         Y[i,:] = tmpW'*Ubar + ds[i]*tmpX;
-         Ubar = Ubar + tmpU*tmpX;
-     end
+    n, m = size(U)
+    mx = size(X, 2)
+    Ubar = zeros(m,mx)
+    @inbounds for i = n:-1:1
+        tmpW = @view W[i,:]
+        tmpU = @view U[i,:]
+        tmpX = @view X[i:i,:]
+        Y[i,:] = tmpW'*Ubar + ds[i]*tmpX;
+        Ubar = Ubar + tmpU*tmpX;
+    end
 end
 #### Forward substitution ####
 function dss_forward!(X::AbstractArray,U::AbstractArray,W::AbstractArray,
                      ds::AbstractArray,B::AbstractArray)
     n, m = size(U)
     mx = size(B,2)
-    Wbar = zeros(m,mx);
-    for i = 1:n
-        tmpU = U[i,:];
-        tmpW = W[i,:];
-        X[i:i,:] = (B[i:i,:] - tmpU'*Wbar)/ds[i];
-        Wbar += tmpW .* X[i:i,:];
+    Wbar = zeros(m,mx)
+    @inbounds for i = 1:n
+        tmpU = @view U[i,:]
+        tmpW = @view W[i,:]
+        X[i:i,:] = (B[i:i,:] - tmpU'*Wbar)/ds[i]
+        Wbar += tmpW .* X[i:i,:]
     end
 end
 #### Backward substitution ####
@@ -131,12 +131,12 @@ function dssa_backward!(X::AbstractArray,U::AbstractArray,W::AbstractArray,
                        ds::AbstractArray,B::AbstractArray)
     n, m = size(U)
     mx = size(B,2)
-    Ubar = zeros(m,mx);
-    for i = n:-1:1
-        tmpU = U[i,:];
-        tmpW = W[i,:];
-        X[i:i,:] = (B[i:i,:] - tmpW'*Ubar)/ds[i];
-        Ubar += tmpU .* X[i:i,:];
+    Ubar = zeros(m,mx)
+    @inbounds for i = n:-1:1
+        tmpU = @view U[i,:]
+        tmpW = @view W[i,:]
+        X[i:i,:] = (B[i:i,:] - tmpW'*Ubar)/ds[i]
+        Ubar += tmpU .* X[i:i,:]
     end
 end
 
@@ -146,9 +146,9 @@ function squared_norm_cols(U::AbstractArray,W::AbstractArray,
     n, m = size(U)
     P = zeros(m, m)
     c = zeros(n)
-    for i = n:-1:1
-        tmpW = W[i,:]
-        tmpU = U[i,:]
+    @inbounds for i = n:-1:1
+        tmpW = @view W[i,:]
+        tmpU = @view U[i,:]
         c[i]  = dbar[i]^2 + tmpW'*P*tmpW
         P += tmpU*tmpU'
     end

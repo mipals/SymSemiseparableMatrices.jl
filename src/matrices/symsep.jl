@@ -18,16 +18,16 @@ end
 
 # Mappings
 mul!(y::AbstractArray, L::SymSemiseparable, x::AbstractArray) =
-    ss_mul_mat!(y, L.U, L.V, x);
+    ss_mul_mat!(y, L.U, L.V, x)
 mul!(y::AbstractArray, L::AdjointOperator{SymSemiseparable}, x::AbstractArray) =
-    ss_mul_mat!(y, L.A.U, L.A.V, x);
+    ss_mul_mat!(y, L.A.U, L.A.V, x)
 function inv!(y, K::SymSemiseparable, b::AbstractArray)
-	L = SymSemiseparableChol(K);
-	y[:,:] = L'\(L\b);
+	L = SymSemiseparableChol(K)
+	y[:,:] = L'\(L\b)
 end
 function inv!(y, K::AdjointOperator{SymSemiseparable}, b::AbstractArray)
-	L = SymSemiseparableChol(K.A);
-	y[:,:] = L'\(L\b);
+	L = SymSemiseparableChol(K.A)
+	y[:,:] = L'\(L\b)
 end
 
 #####################################################################
@@ -36,16 +36,16 @@ end
 
 #### Matrix-matrix product ####
 function ss_mul_mat!(Y::AbstractArray, U::AbstractArray, V::AbstractArray, X::AbstractArray)
-    n, m = size(U);
-    mx = size(X,2);
-    Vbar = zeros(m,mx);
-    Ubar = U'*X;
+    n, m = size(U)
+    mx = size(X,2)
+    Vbar = zeros(m,mx)
+    Ubar = U'*X
     for i = 1:n
-        tmpV = V[i,:];
-        tmpU = U[i,:];
-        Ubar -= tmpU .* X[i:i,:];
-        Vbar += tmpV .* X[i:i,:];
-        Y[i,:] = Vbar'*tmpU + Ubar'*tmpV;
+        tmpV = @view V[i,:]
+        tmpU = @view U[i,:]
+        Ubar -= tmpU .* X[i:i,:]
+        Vbar += tmpV .* X[i:i,:]
+        Y[i,:] = Vbar'*tmpU + Ubar'*tmpV
     end
 end
 
@@ -53,13 +53,13 @@ end
 function ss_create_v(U::AbstractArray, W::AbstractArray)
     n,m = size(U)
     V = zeros(n,m)
-    P = zeros(m,m);
+    P = zeros(m,m)
     for i = 1:n
         tmpW = W[i,:]
         tmpU = U[i,:]
         tmpV = tmpW*(tmpU'*tmpW)
         V[i,:] = tmpV + P*tmpU
-        P += tmpW*tmpW';
+        P += tmpW*tmpW'
     end
     return V
 end
