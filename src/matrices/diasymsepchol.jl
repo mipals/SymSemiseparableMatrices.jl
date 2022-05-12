@@ -75,7 +75,7 @@ function dss_create_wdbar(U::AbstractArray, V::AbstractArray, d::AbstractArray)
     W  = zeros(n, m)
     dbar = zeros(n)
     for i = 1:n
-        tmpU  = @ivew U[i,:]
+        tmpU  = @view U[i,:]
         tmpW  = V[i,:] - P*tmpU
         tmpds = sqrt(tmpU'*tmpW + d[i])
         tmpW  = tmpW/tmpds
