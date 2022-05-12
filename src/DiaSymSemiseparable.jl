@@ -1,5 +1,5 @@
 #==========================================================================================
-                                Struct & Constructors
+                                Constructors
 ==========================================================================================#
 function DiaSymSemiseparable(U::AbstractArray, V::AbstractArray, d::AbstractArray)
     if size(U,1) == size(V,1) && size(U,2) == size(V,2) && length(d) == size(U,1)
@@ -15,7 +15,6 @@ function DiaSymSemiseparable(L::DiaSymSemiseparableCholesky)
     V, d = dss_create_vd(L.U, L.W, L.ds);
     return DiaSymSemiseparable(L.n, L.p, L.U, V, d)
 end
-
 #==========================================================================================
                         Defining multiplication and inverse
 ==========================================================================================#
@@ -60,7 +59,8 @@ end
 """
     dss_create_vd(U, W, dbar)
 
-Computes `V` and `d` from the Cholesky factorization.
+Using `L = tril(U*W',-1) + Diagonal(dbar)`, compute `V` and `d` such that
+`LL = tril(UV') + triu(V'*U,1) + Diagonal(d)`.
 """
 function dss_create_vd(U, W, dbar)
     n,m = size(U)

@@ -1,5 +1,5 @@
 #==========================================================================================
-                                Struct & Constructors
+                                Constructors
 ==========================================================================================#
 function SymSemiseparableCholesky(U::AbstractArray, W::AbstractArray)
 	if size(U,1) == size(W,1) && size(U,2) == size(W,2)

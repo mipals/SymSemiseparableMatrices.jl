@@ -1,7 +1,6 @@
 #==========================================================================================
-                                Struct & Constructors
+                                Constructors
 ==========================================================================================#
-# Constuctors
 function SymSemiseparable(U::AbstractArray, V::AbstractArray)
     if size(U,1) == size(V,1) && size(U,2) == size(V,2)
         return SymSemiseparable(size(U,1),size(U,2),U,V);
@@ -49,7 +48,11 @@ function ss_mul_mat!(Y, U, V, X)
     end
 end
 
-#### Matrix vector product ####
+"""
+    ss_create_v(U, W)
+
+Using `L = tril(U*W')`, compute `V` such that `LL = tril(UV') + triu(V'*U,1)`.
+"""
 function ss_create_v(U, W)
     n,m = size(U)
     V = zeros(n,m)

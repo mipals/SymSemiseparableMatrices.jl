@@ -1,5 +1,5 @@
 #==========================================================================================
-                                Struct & Constructors
+                                Constructors
 ==========================================================================================#
 function DiaSymSemiseparableCholesky(U::AbstractArray, W::AbstractArray, ds::AbstractArray) 
     return DiaSymSemiseparableCholesky(size(U,1),size(U,2),U,W,ds)
@@ -45,7 +45,7 @@ function fro_norm_L(L::DiaSymSemiseparableCholesky)
 end
 
 function trinv(L::DiaSymSemiseparableCholesky)
-	dbar = L.ds;
+	dbar = L.ds
 	Y, Z = dss_create_yz(L.U, L.W, dbar)
 	return sum(squared_norm_cols(Y,Z, dbar.^(-1)))
 end
@@ -53,7 +53,6 @@ function tr(L::DiaSymSemiseparableCholesky)
 	return sum(L.ds)
 end
 function tr(Ky::DiaSymSemiseparableCholesky, K::SymSemiseparable)
-	n = Ky.n
 	p = Ky.p
 	c = Ky.ds
 	U = K.U
@@ -74,12 +73,9 @@ function tr(Ky::DiaSymSemiseparableCholesky, K::SymSemiseparable)
 	end
 	return b
 end
-newlogdet(L::DiaSymSemiseparableCholesky) = dss_logdet(L.ds)
-newlogdet(L::AdjointOperator{DiaSymSemiseparableCholesky}) = dss_logdet(L.A.ds)
 #===========================================================================================
                 Choleskyesky factorization of Higher-order quasiseparable matrices
 ===========================================================================================#
-#### Creating W and ds s.t. L = tril(UW',-1) + diag(ds) ####
 """
     dss_create_wdbar(U, V, d)
 
@@ -110,8 +106,8 @@ function dss_tri_mul!(Y,U,W,ds,X)
         tmpW = @view W[i,:]
         tmpU = @view U[i,:]
         tmpX = @view X[i:i,:]
-        Y[i,:] = tmpU'*Wbar + ds[i]*tmpX;
-        Wbar  +=  tmpW*tmpX;
+        Y[i,:] = tmpU'*Wbar + ds[i]*tmpX
+        Wbar  += tmpW*tmpX
     end
 end
 #### Adjoint of Ld ####
@@ -176,6 +172,6 @@ function dss_create_yz(U, W,dbar)
     return Y, Z*inv(U'*Z - I)
 end
 #### Log-determinant ####
-function dss_logdet(d)
-    return sum(log.(d))
-end
+dss_logdet(d) = sum(log,d)
+newlogdet(L::DiaSymSemiseparableCholesky) = dss_logdet(L.ds)
+newlogdet(L::AdjointOperator{DiaSymSemiseparableCholesky}) = dss_logdet(L.A.ds)

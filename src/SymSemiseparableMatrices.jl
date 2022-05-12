@@ -7,8 +7,8 @@ using LinearAlgebra
 import LinearAlgebra: inv!, tr, mul!, logdet
 import Base: inv, size, eltype, adjoint, *, \
 
-# Creating abstract types
-abstract type SymSemiseparableMatrix end
+# Creating Types
+abstract type SymSemiseparableMatrix    end
 struct SymSemiseparable <: SymSemiseparableMatrix
     n::Int64
     p::Int64

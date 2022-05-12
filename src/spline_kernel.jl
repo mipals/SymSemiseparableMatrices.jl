@@ -66,6 +66,7 @@ Returns the dense spline kernel matrix with generators `U` and `V`.
 function spline_kernel_matrix(U, V)
     return tril(U*V') + triu(V*U',1)
 end
+
 """
     spline_kernel_matrix(U, V, d)
 
@@ -75,6 +76,11 @@ function spline_kernel_matrix(U, V, d )
     return spline_kernel_matrix(U, V) + Diagonal(d)
 end
 
+"""
+    logp(Σ, T, y, σf, σn)
+
+Generalized Log-likelihood evalation for the spline kernel.
+"""
 function logp(Σ, T, y, σf, σn)
     m = rank(T)
     n = length(y)
@@ -92,9 +98,12 @@ function logp(Σ, T, y, σf, σn)
     return lp
 end
 
+"""
+    dlogp(Σ, T, y, σf, σn)
+
+Derivatives of the generalized Log-likelihood for the spline kernel.
+"""
 function dlogp(Σ, T, y, σf, σn)
-    m = rank(T)
-    n = length(y)
     Ki = cholesky(σf^2*Σ  + σn^2*I)
     if LinearAlgebra.issuccess(Ki) == false
         throw(DomainError("Cholesky Factorization failed"))
@@ -119,7 +128,11 @@ function dlogp(Σ, T, y, σf, σn)
     return [dlpf; dlpn]
 end
 
-## Auxillary functions
+"""
+    create_T(t, m)
+
+Creates `m`-order Taylor-polynomial basis from the knots in `t`.
+"""
 function create_T(t, m)
     T = ones(length(t), m)
     for ν = 2:m
