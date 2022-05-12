@@ -24,16 +24,16 @@ function mul!(y::AbstractArray, L::AdjointOperator{DiaSymSemiseparable}, b::Abst
     dss_mul_mat!(y, L.A.U, L.A.V, L.A.d, b)
 end
 function inv!(y, K::DiaSymSemiseparable, b::AbstractArray)
-	L = DiaSymSemiseparableChol(K)
+	L = DiaSymSemiseparableCholesky(K)
 	y[:,:] = L'\(L\b)
 end
 function inv!(y, K::AdjointOperator{DiaSymSemiseparable}, b::AbstractArray)
-	L = DiaSymSemiseparableChol(K.A)
+	L = DiaSymSemiseparableCholesky(K.A)
 	y[:,:] = L'\(L\b)
 end
 
 #===========================================================================================
-                CCholesky factoriaztion of:  Higher-order quasiseparable matrices
+                Cholesky factoriaztion of:  Higher-order quasiseparable matrices
 ===========================================================================================#
 #### Matrix-matrix product ####
 function dss_mul_mat!(Y::Array, U::Array, V::Array, d::Array, X::Array)

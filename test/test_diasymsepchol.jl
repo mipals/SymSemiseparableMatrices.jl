@@ -11,7 +11,7 @@ chol = cholesky(Σ)
 # Creating a symmetric exended generator representable semiseperable matrix
 K  = DiaSymSemiseparable(U,V,ones(n))
 # Calculating its Cholesky factorization
-L = DiaSymSemiseparableChol(K)
+L = DiaSymSemiseparableCholesky(K)
 # Creating a test vector
 x = randn(n);
 
@@ -37,5 +37,5 @@ D = SymSemiseparable(U,V);
 @test isapprox(tr(L,D), tr(chol\spline_kernel_matrix(U, V))) # Trace of (K+D)^(-1)K
 
 # Testing using the SymSemiseparableChol struct as a lower triangular matrix
-C = DiaSymSemiseparableChol(U,V,ones(K.n));
+C = DiaSymSemiseparableCholesky(U,V,ones(K.n));
 @test isapprox(C*x, (tril(U*V',-1) + I)*x)

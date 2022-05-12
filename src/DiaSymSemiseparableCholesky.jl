@@ -1,6 +1,6 @@
-export DiaSymSemiseparableChol, trinv
+export DiaSymSemiseparableCholesky, trinv
 
-struct DiaSymSemiseparableChol <: SymSemiseparableCholesky
+struct DiaSymSemiseparableCholesky <: SymSemiseparableMatrix
     n::Int64
     p::Int64
     U::AbstractArray
@@ -9,48 +9,48 @@ struct DiaSymSemiseparableChol <: SymSemiseparableCholesky
 end
 
 # Constuctors
-function DiaSymSemiseparableChol(U::AbstractArray, W::AbstractArray, ds::AbstractArray) 
-    return DiaSymSemiseparableChol(size(U,1),size(U,2),U,W,ds)
+function DiaSymSemiseparableCholesky(U::AbstractArray, W::AbstractArray, ds::AbstractArray) 
+    return DiaSymSemiseparableCholesky(size(U,1),size(U,2),U,W,ds)
 end
 
 # Mappings
-function mul!(y::AbstractArray, L::DiaSymSemiseparableChol, b::AbstractArray) 
+function mul!(y::AbstractArray, L::DiaSymSemiseparableCholesky, b::AbstractArray) 
     dss_tri_mul!(y, L.U, L.W, L.ds, b)
 end
-function mul!(y::AbstractArray, L::AdjointOperator{DiaSymSemiseparableChol}, b::AbstractArray)
+function mul!(y::AbstractArray, L::AdjointOperator{DiaSymSemiseparableCholesky}, b::AbstractArray)
     dssa_tri_mul!(y, L.A.U, L.A.W, L.A.ds, b)
 end
-function inv!(y::AbstractArray, L::DiaSymSemiseparableChol, b::AbstractArray) 
+function inv!(y::AbstractArray, L::DiaSymSemiseparableCholesky, b::AbstractArray) 
     dss_forward!(y, L.U, L.W, L.ds, b)
 end
-function inv!(y::AbstractArray, L::AdjointOperator{DiaSymSemiseparableChol}, b::AbstractArray) 
+function inv!(y::AbstractArray, L::AdjointOperator{DiaSymSemiseparableCholesky}, b::AbstractArray) 
     dssa_backward!(y, L.A.U, L.A.W, L.A.ds, b)
 end
-newlogdet(L::DiaSymSemiseparableChol) = dss_logdet(L.ds)
-newlogdet(L::AdjointOperator{DiaSymSemiseparableChol}) = dss_logdet(L.A.ds)
+newlogdet(L::DiaSymSemiseparableCholesky) = dss_logdet(L.ds)
+newlogdet(L::AdjointOperator{DiaSymSemiseparableCholesky}) = dss_logdet(L.A.ds)
 
 #### Inverse of a EGRQSCholesky using the Cholesky factorization ####
-function inv(L::DiaSymSemiseparableChol)
+function inv(L::DiaSymSemiseparableCholesky)
 	return L'\(L\Diagonal(ones(L.n)))
 end
-function inv(L::DiaSymSemiseparableChol, b::AbstractArray)
+function inv(L::DiaSymSemiseparableCholesky, b::AbstractArray)
 	return L'\(L\b)
 end
 
 # Traces, norms and determinants
-function fro_norm_L(L::DiaSymSemiseparableChol)
+function fro_norm_L(L::DiaSymSemiseparableCholesky)
 	return sum(squared_norm_cols(L.U, L.W, L.ds))
 end
 
-function trinv(L::DiaSymSemiseparableChol)
+function trinv(L::DiaSymSemiseparableCholesky)
 	dbar = L.ds;
 	Y, Z = dss_create_yz(L.U, L.W, dbar)
 	return sum(squared_norm_cols(Y,Z, dbar.^(-1)))
 end
-function tr(L::DiaSymSemiseparableChol)
+function tr(L::DiaSymSemiseparableCholesky)
 	return sum(L.ds)
 end
-function tr(Ky::DiaSymSemiseparableChol, K::SymSemiseparable)
+function tr(Ky::DiaSymSemiseparableCholesky, K::SymSemiseparable)
 	n = Ky.n
 	p = Ky.p
 	c = Ky.ds
@@ -74,7 +74,7 @@ function tr(Ky::DiaSymSemiseparableChol, K::SymSemiseparable)
 end
 
 #===========================================================================================
-                Cholesky factorization of Higher-order quasiseparable matrices
+                Choleskyesky factorization of Higher-order quasiseparable matrices
 ===========================================================================================#
 
 #### Creating W and ds s.t. L = tril(UW',-1) + diag(ds) ####

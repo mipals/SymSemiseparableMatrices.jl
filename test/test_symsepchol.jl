@@ -9,7 +9,7 @@ chol = cholesky(Σ)
 # Creating a symmetric extended generator representable semiseperable matrix
 K = SymSemiseparable(U,V)
 # Calculating its Cholesky factorization
-L = SymSemiseparableChol(K)
+L = SymSemiseparableCholesky(K)
 # Creating a test vector
 xt = ones(K.n);
 
@@ -27,7 +27,7 @@ xt = ones(K.n);
 @test isapprox(logdet(L'), logdet(chol.U), atol=1e-10)
 
 # Testing the Cholesky as a lower triangular matrix
-C = SymSemiseparableChol(U,V);
+C = SymSemiseparableCholesky(U,V);
 @test isapprox(C*xt, tril(U*V')*xt)
 
 # Testing going from Cholesky back to the matrix K

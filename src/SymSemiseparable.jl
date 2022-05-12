@@ -22,11 +22,11 @@ mul!(y::AbstractArray, L::SymSemiseparable, x::AbstractArray) =
 mul!(y::AbstractArray, L::AdjointOperator{SymSemiseparable}, x::AbstractArray) =
     ss_mul_mat!(y, L.A.U, L.A.V, x)
 function inv!(y, K::SymSemiseparable, b::AbstractArray)
-	L = SymSemiseparableChol(K)
+	L = SymSemiseparableCholesky(K)
 	y[:,:] = L'\(L\b)
 end
 function inv!(y, K::AdjointOperator{SymSemiseparable}, b::AbstractArray)
-	L = SymSemiseparableChol(K.A)
+	L = SymSemiseparableCholesky(K.A)
 	y[:,:] = L'\(L\b)
 end
 
