@@ -1,14 +1,6 @@
-export DiaSymSemiseparable
-
-struct DiaSymSemiseparable <: SymSemiseparableMatrix
-    n::Int64
-    p::Int64
-    U::AbstractArray
-    V::AbstractArray
-    d::AbstractArray
-end
-
-# Constuctors
+#==========================================================================================
+                                Struct & Constructors
+==========================================================================================#
 function DiaSymSemiseparable(U::AbstractArray, V::AbstractArray, d::AbstractArray)
     if size(U,1) == size(V,1) && size(U,2) == size(V,2) && length(d) == size(U,1)
         return DiaSymSemiseparable(size(U,1),size(U,2),U,V,d);
@@ -16,7 +8,17 @@ function DiaSymSemiseparable(U::AbstractArray, V::AbstractArray, d::AbstractArra
         error("Dimension mismatch between the generators U, V and d")
     end
 end
-# Mappings
+function DiaSymSemiseparable(L::SymSemiseparable, d::AbstractArray)
+    return DiaSymSemiseparable(L.n, L.p, L.U, L.V, d)
+end
+function DiaSymSemiseparable(L::DiaSymSemiseparableCholesky)
+    V, d = dss_create_vd(L.U, L.W, L.ds);
+    return DiaSymSemiseparable(L.n, L.p, L.U, V, d)
+end
+
+#==========================================================================================
+                        Defining multiplication and inverse
+==========================================================================================#
 function mul!(y::AbstractArray, L::DiaSymSemiseparable, b::AbstractArray)
     dss_mul_mat!(y, L.U, L.V, L.d, b)
 end
@@ -35,8 +37,12 @@ end
 #===========================================================================================
                 Cholesky factoriaztion of:  Higher-order quasiseparable matrices
 ===========================================================================================#
-#### Matrix-matrix product ####
-function dss_mul_mat!(Y::Array, U::Array, V::Array, d::Array, X::Array)
+"""
+    dss_mul_mat!(Y, U, V, d, X)
+
+Computes the matrix-matrix product `Y = (tril(U*V') + triu(V*U',1) + diag(d))*X`.
+"""
+function dss_mul_mat!(Y, U, V, d, X)
     n, m = size(U)
     mx = size(X,2)
     Vbar = zeros(m,mx)
@@ -50,8 +56,13 @@ function dss_mul_mat!(Y::Array, U::Array, V::Array, d::Array, X::Array)
         Y[i,:] = tmpU'*Vbar + tmpV'*Ubar + d[i]*tmpX
     end
 end
-#### Going from the Cholesky factorization back to matrix Σ ####
-function dss_create_vd(U::Array, W::Array, dbar::Array)
+
+"""
+    dss_create_vd(U, W, dbar)
+
+Computes `V` and `d` from the Cholesky factorization.
+"""
+function dss_create_vd(U, W, dbar)
     n,m = size(U)
     d = zeros(n)
     V = zeros(n,m)

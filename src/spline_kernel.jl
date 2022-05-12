@@ -1,5 +1,13 @@
+"""
+    alpha(p::Int)
+
+Returns coefficients for the spline kernel of order `p`.
+"""
 function alpha(p::Int)
-    a = zeros(p, 1)
+    if p < 1
+        throw(DomainError("Spline order has to be strictly positive"))
+    end
+    a = zeros(p)
     for i = 0:p-1
         for j = 0:i
             for k = i:p-1
@@ -12,14 +20,21 @@ function alpha(p::Int)
             end
         end
     end
-    return a;
+    return a
 end
 
-function spline_kernel(t::Array{Float64}, p::Int)
+"""
+    spline_kernel(t, p)
+
+Returns generators `U` and `V` for the spline kernel of order `p` given a list of knots `t`.
+"""
+function spline_kernel(t, p)
 
     #TO-DO
     # Check inputs
     # Maybe the Vector(range) can be done more eleganly.
+    fp = factorial.(p-1:-1:0)
+    a = alpha(p).*fp
 
     if all(diff(t) .> 0)
         monotonic = 1
@@ -32,9 +47,6 @@ function spline_kernel(t::Array{Float64}, p::Int)
     if size(t,2) != 1 && size(t,1) == 1
         t = t'
     end
-
-    fp = factorial.(p-1:-1:0)
-    a = alpha(p).*fp
     if monotonic == 1;
         U = (repeat(t,1,p).^Vector(p-1:-1:0)')./fp'
         V = (repeat(t,1,p).^Vector(p:2*p-1)').*a'
@@ -46,9 +58,23 @@ function spline_kernel(t::Array{Float64}, p::Int)
     return U,V
 end
 
-function spline_kernel_matrix(U::Array{Float64}, V::Array{Float64})
+"""
+    spline_kernel_matrix(U, V)
+
+Returns the dense spline kernel matrix with generators `U` and `V`.
+"""
+function spline_kernel_matrix(U, V)
     return tril(U*V') + triu(V*U',1)
 end
+"""
+    spline_kernel_matrix(U, V, d)
+
+Returns the dense spline kernel matrix with generators `U` and `V` plus `Diagonal(d)`.
+"""
+function spline_kernel_matrix(U, V, d )
+    return spline_kernel_matrix(U, V) + Diagonal(d)
+end
+
 function logp(Σ, T, y, σf, σn)
     m = rank(T)
     n = length(y)

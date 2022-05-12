@@ -1,33 +1,32 @@
-###### ' ######
+# Overloading adjoint
 adjoint(L::T) where {T <: SymSemiseparableMatrix} = AdjointOperator(L)
 
-## Fix (*) and (\) overloadings. Not nice to have if/else statements
-###### * ######
+# TODO: Fix (*) and (\) overloadings. Not nice to have if/else statements
+
+# Overloading multiplication
 function (*)(L::SymSemiseparableMatrix, x::AbstractArray)
 	if typeof(L) <: AdjointOperator
 		y = zeros(L.A.n, size(x,2));
 		mul!(y, L, x)
-		return y
 	else
 		y = zeros(L.n, size(x,2));
 		mul!(y, L, x)
-		return y
 	end
+    return y
 end
 
-###### \ ######
+# Overloading inverse
 function (\)(L::SymSemiseparableMatrix, x::AbstractArray)
 	if typeof(L) <: AdjointOperator
 		y = zeros(L.A.n, size(x,2));
 		inv!(y, L, x)
-		return y
 	else
 		y = zeros(L.n, size(x,2));
 		inv!(y, L, x)
-		return y
 	end
+    return y
 end
-#### Log-determinant ####
+# Overloading log-determinant
 function logdet(L::SymSemiseparableMatrix)
 	return newlogdet(L)
 end

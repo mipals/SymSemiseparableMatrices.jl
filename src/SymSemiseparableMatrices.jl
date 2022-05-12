@@ -9,6 +9,32 @@ import Base: inv, size, eltype, adjoint, *, \
 
 # Creating abstract types
 abstract type SymSemiseparableMatrix end
+struct SymSemiseparable <: SymSemiseparableMatrix
+    n::Int64
+    p::Int64
+    U::AbstractArray
+    V::AbstractArray
+end
+struct SymSemiseparableCholesky <: SymSemiseparableMatrix
+    n::Int64
+    p::Int64
+    U::AbstractArray
+    W::AbstractArray
+end
+struct DiaSymSemiseparable <: SymSemiseparableMatrix
+    n::Int64
+    p::Int64
+    U::AbstractArray
+    V::AbstractArray
+    d::AbstractArray
+end
+struct DiaSymSemiseparableCholesky <: SymSemiseparableMatrix
+    n::Int64
+    p::Int64
+    U::AbstractArray
+    W::AbstractArray
+    ds::AbstractArray
+end
 
 # Properties
 include("adjointoperator.jl")
@@ -26,26 +52,9 @@ include("operator_overloading.jl")
 include("spline_kernel.jl")
 
 # Exporting Relevant 
-export SymSemiseparableMatrix, SymSemiseparableCholesky
-
-# More constructors - Should be moved to other files
-SymSemiseparableCholesky(K::SymSemiseparable) = SymSemiseparableCholesky(K.n, K.p, K.U, ss_create_w(K.U, K.V))
-SymSemiseparable(L::SymSemiseparableCholesky) = SymSemiseparable(L.n, L.p, L.U, ss_create_v(L.U, L.W))
-DiaSymSemiseparable(L::SymSemiseparable, d::AbstractArray) = DiaSymSemiseparable(L.n, L.p, L.U, L.V, d)
-function DiaSymSemiseparableCholesky(L::DiaSymSemiseparable)
-      W, dbar = dss_create_wdbar(L.U, L.V, L.d)
-      return DiaSymSemiseparableCholesky(L.n, L.p, L.U, W, dbar)
-end
-function DiaSymSemiseparable(L::DiaSymSemiseparableCholesky)
-      V, d = dss_create_vd(L.U, L.W, L.ds);
-      return DiaSymSemiseparable(L.n, L.p, L.U, V, d)
-end
-
-function DiaSymSemiseparableCholesky(U::AbstractArray, V::AbstractArray, σn, σf)
-      n, p = size(U)
-      W, dbar = dss_create_wdbar(σf*U, σf*V, ones(n)*σn^2)
-      DiaSymSemiseparableCholesky(n, p, σf*U, W, dbar)
-end
-
+export SymSemiseparableMatrix
+export SymSemiseparable, SymSemiseparableCholesky
+export DiaSymSemiseparable, DiaSymSemiseparableCholesky
+export trinv
 
 end # module

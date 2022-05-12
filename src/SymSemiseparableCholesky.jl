@@ -1,13 +1,6 @@
-export SymSemiseparableCholesky
-
-struct SymSemiseparableCholesky <: SymSemiseparableMatrix
-    n::Int64
-    p::Int64
-    U::AbstractArray
-    W::AbstractArray
-end
-
-# Constuctors
+#==========================================================================================
+                                Struct & Constructors
+==========================================================================================#
 function SymSemiseparableCholesky(U::AbstractArray, W::AbstractArray)
 	if size(U,1) == size(W,1) && size(U,2) == size(W,2)
 		return SymSemiseparableCholesky(size(U,1),size(U,2),U,W)
@@ -15,16 +8,24 @@ function SymSemiseparableCholesky(U::AbstractArray, W::AbstractArray)
 		error("Dimension mismatch between the generators U and W")
 	end
 end
-
-# Mappings
-mul!(y::AbstractArray, L::SymSemiseparableCholesky, 		         b::AbstractArray) =
+function SymSemiseparableCholesky(K::SymSemiseparable)
+    return SymSemiseparableCholesky(K.n, K.p, K.U, ss_create_w(K.U, K.V))
+end
+#==========================================================================================
+                        Defining multiplication and inverse
+==========================================================================================#
+function mul!(y::AbstractArray, L::SymSemiseparableCholesky, b::AbstractArray)
 	ss_tri_mul!(y, L.U,   L.W,   b)
-mul!(y::AbstractArray, L::AdjointOperator{SymSemiseparableCholesky}, b::AbstractArray) =
+end
+function mul!(y::AbstractArray, L::AdjointOperator{SymSemiseparableCholesky}, b::AbstractArray)
 	ssa_tri_mul!(y, L.A.U, L.A.W, b)
-inv!(y::AbstractArray, L::SymSemiseparableCholesky, 		    	 b::AbstractArray) =
+end
+function inv!(y::AbstractArray, L::SymSemiseparableCholesky, b::AbstractArray)
 	ss_forward!(y, L.U,   L.W,   b)
-inv!(y::AbstractArray, L::AdjointOperator{SymSemiseparableCholesky}, b::AbstractArray) =
+end
+function inv!(y::AbstractArray, L::AdjointOperator{SymSemiseparableCholesky}, b::AbstractArray)
 	ssa_backward!(y, L.A.U, L.A.W, b)
+end
 newlogdet(L::SymSemiseparableCholesky) = ss_logdet(L.U, L.W)
 newlogdet(L::AdjointOperator{SymSemiseparableCholesky}) = ss_logdet(L.A.U, L.A.W)
 
@@ -36,12 +37,15 @@ function inv(L::SymSemiseparableCholesky, b::AbstractArray)
 	return L'\(L\b)
 end
 
-########################################################################
-#### Choleskyesky factoriaztion of:                                     ####
-####    Extended generator representable {p}-semiseperable matrices ####
-########################################################################
+#==========================================================================================
+                        Defining the computations
+==========================================================================================#
+"""
+    ss_create_w(U,V)
 
-# Creating W, s.t. L = tril(UW')
+Creates matrix `W` such that the Cholesky factorization of the SymSemiseparable(U,V) matrix
+is `L = tril(U*W')` in linear complexity.
+"""
 function ss_create_w(U,V)
     n,p = size(U)
     wTw = zeros(p,p)
@@ -55,9 +59,12 @@ function ss_create_w(U,V)
     end
     return W
 end
-#### Triangular product ####
-function ss_tri_mul!(Y::AbstractArray,U::AbstractArray,
-                     W::AbstractArray,X::AbstractArray)
+"""
+    ss_tri_mul!(Y,U,W,X)
+
+Computes the multiplization `tril(U*W')*X = Y` in linear complexity.
+"""
+function ss_tri_mul!(Y,U,W,X)
     n, m = size(U)
     mx = size(X,2)
     Wbar = zeros(m,mx)
@@ -69,9 +76,12 @@ function ss_tri_mul!(Y::AbstractArray,U::AbstractArray,
         Y[i,:] = Wbar'*tmpU
     end
 end
-#### Adjoint triangular product ####
-function ssa_tri_mul!(Y::AbstractArray,U::AbstractArray,
-                      W::AbstractArray,X::AbstractArray)
+"""
+    ssa_tri_mul!(Y,U,W,X)
+
+Computes the multiplization `triu(W*U')*X = Y` in linear complexity.
+"""
+function ssa_tri_mul!(Y,U,W,X)
     n, m = size(U)
     mx = size(X,2)
     Ubar = zeros(m,mx)
@@ -84,9 +94,12 @@ function ssa_tri_mul!(Y::AbstractArray,U::AbstractArray,
         Ubar  -= tmpU .* tmpX
     end
 end
-#### Forward substitution (solve Lx = b) ####
-function ss_forward!(X::AbstractArray, U::AbstractArray,
-                     W::AbstractArray, B::AbstractArray)
+"""
+    ss_forward!
+
+Solves the linear system `tril(U*W')*X = B`.
+"""
+function ss_forward!(X, U,W, B)
     n, m = size(U)
     mx = size(B,2)
     Wbar = zeros(m, mx)
@@ -97,9 +110,12 @@ function ss_forward!(X::AbstractArray, U::AbstractArray,
         Wbar += tmpW .* X[i:i,:]
     end
 end
-#### Backward substitution (solve L'x = b) ####
-function ssa_backward!(X::AbstractArray, U::AbstractArray,
-                       W::AbstractArray, B::AbstractArray)
+"""
+    ssa_backward!(X, U, W, B)
+
+Solves the linear system `triu(W*U')*X = Y`.
+"""
+function ssa_backward!(X, U, W, B)
     n, m = size(U)
     mx = size(B,2)
     Ubar = zeros(m,mx)
@@ -111,10 +127,9 @@ function ssa_backward!(X::AbstractArray, U::AbstractArray,
     end
 end
 #### Logarithm of determinant ####
-function ss_logdet(U::AbstractArray, W::AbstractArray)
-    n = size(U, 1)
-    a = 0
-    for i = 1:n
+function ss_logdet(U, W)
+    a = 0.0
+    @inbounds for i = 1:size(U, 1)
         a += log(dot(U[i,:],W[i,:]))
     end
     return a

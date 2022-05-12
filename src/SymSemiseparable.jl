@@ -1,12 +1,6 @@
-export SymSemiseparable
-
-struct SymSemiseparable <: SymSemiseparableMatrix
-    n::Int64
-    p::Int64
-    U::AbstractArray
-    V::AbstractArray
-end
-
+#==========================================================================================
+                                Struct & Constructors
+==========================================================================================#
 # Constuctors
 function SymSemiseparable(U::AbstractArray, V::AbstractArray)
     if size(U,1) == size(V,1) && size(U,2) == size(V,2)
@@ -15,8 +9,12 @@ function SymSemiseparable(U::AbstractArray, V::AbstractArray)
         error("Dimension mismatch between generators U and V")
     end
 end
-
-# Mappings
+function SymSemiseparable(L::SymSemiseparableCholesky) 
+    return SymSemiseparable(L.n, L.p, L.U, ss_create_v(L.U, L.W))
+end
+#==========================================================================================
+                        Defining multiplication and inverse
+==========================================================================================#
 mul!(y::AbstractArray, L::SymSemiseparable, x::AbstractArray) =
     ss_mul_mat!(y, L.U, L.V, x)
 mul!(y::AbstractArray, L::AdjointOperator{SymSemiseparable}, x::AbstractArray) =
@@ -29,13 +27,15 @@ function inv!(y, K::AdjointOperator{SymSemiseparable}, b::AbstractArray)
 	L = SymSemiseparableCholesky(K.A)
 	y[:,:] = L'\(L\b)
 end
+#==========================================================================================
+                        Defining the Linear Algebra
+==========================================================================================#
+"""
+    ss_mul_mat!(Y, U, V, X)
 
-#####################################################################
-#### Extended generator representable {p}-semiseperable matrices ####
-#####################################################################
-
-#### Matrix-matrix product ####
-function ss_mul_mat!(Y::AbstractArray, U::AbstractArray, V::AbstractArray, X::AbstractArray)
+Computes the matrix-matrix product `Y = (tril(U*V') + triu(V*U',1))*X` in linear complexity.
+"""
+function ss_mul_mat!(Y, U, V, X)
     n, m = size(U)
     mx = size(X,2)
     Vbar = zeros(m,mx)
@@ -50,7 +50,7 @@ function ss_mul_mat!(Y::AbstractArray, U::AbstractArray, V::AbstractArray, X::Ab
 end
 
 #### Matrix vector product ####
-function ss_create_v(U::AbstractArray, W::AbstractArray)
+function ss_create_v(U, W)
     n,m = size(U)
     V = zeros(n,m)
     P = zeros(m,m)
