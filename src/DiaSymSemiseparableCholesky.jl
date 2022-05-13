@@ -98,10 +98,10 @@ function tr(Ky::DiaSymSemiseparableCholesky, K::SymSemiseparableMatrix)
 	P = zeros(p,p)
 	R = zeros(p,p)
 	@inbounds for k = 1:Ky.n
-		yk = @view Y[k,:]
-		zk = @view Z[k,:]
-		uk = @view U[k,:]
-		vk = @view V[k,:]
+		yk = @view Y[:,k]
+		zk = @view Z[:,k]
+		uk = @view U[:,k]
+		vk = @view V[:,k]
 		cki = c[k]^(-1)
 		b += yk'*P*yk + 2*yk'*R*uk*cki + uk'*vk*(cki^2)
 		P += ((uk'*vk)*zk)*zk' + zk*(R*uk)' + (R*uk)*zk'
@@ -202,10 +202,10 @@ function dss_create_yz(U, W,dbar)
     m, n = size(U)
     Y = zeros(n,m)
     Z = zeros(n,m)
-    dss_forward!(Y, U, W, dbar, U)
-    dssa_backward!(Z, U, W, dbar, W)
+    dss_forward!(Y, U, W, dbar, U')
+    dssa_backward!(Z, U, W, dbar, W')
     # Probably best not to use inv
-    return Y, Z*inv(U'*Z - I)
+    return copy(Y'), copy((Z*inv(U*Z - Diagonal(ones(m))))')
 end
 #### Log-determinant ####
 dss_logdet(d) = sum(log,d)

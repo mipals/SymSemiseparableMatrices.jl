@@ -26,8 +26,19 @@ B = randn(length(t),10)
 @test det(L) ≈ det(chol.L)
 
 # Testing traces and norm
-# M = SymSemiseparableMatrix(Ut,Vt)
-# @test isapprox(tr(L,M), tr(chol\Matrix(M)), atol=1e-6)
+M = SymSemiseparableMatrix(Ut,Vt)
+Ky = L
+K = M
+U = K.Ut
+V = K.Vt
+c = Ky.d
+Y, Z = SymSemiseparableMatrices.dss_create_yz(Ky.Ut, Ky.Wt, Ky.d)
+b = 0.0
+P = zeros(p,p)
+R = zeros(p,p)
+
+
+@test isapprox(tr(L,M), tr(chol\Matrix(M)), atol=1e-6)
 # @test trinv(L) ≈ tr(chol\Diagonal(ones(size(L,1))))
 # @test SymEGRSSMatrices.fro_norm_L(L) ≈ norm(chol.L[:])^2
 
@@ -39,9 +50,13 @@ B = randn(length(t),10)
 @test L[2,2] ≈ chol.L[2,2]
 @test L[1,3] ≈ chol.L[1,3]
 
+
 # # Testing explicit-implicit-inverse
-# Yt, Zt = SymSemiseparableMatrices.dss_create_yz(L.Ut,L.Wt,L.d)
-# @test tril(Yt'*Zt,-1) + Diagonal(L.d.^(-1)) ≈ inv(chol.L)
-# @test L*(tril(Yt'*Zt,-1) + Diagonal(L.d.^(-1))) ≈ I
-# @test L'*(triu(Zt'*Yt,1) + Diagonal(L.d.^(-1))) ≈ I
-# @test SymSemiseparableMatrices.squared_norm_cols(Yt,Zt,L.d.^(-1)) ≈ sum(inv(chol.L).^2,dims=1)'
+U = L.Ut
+W = L.Wt
+dbar = L.d
+Yt, Zt = SymSemiseparableMatrices.dss_create_yz(L.Ut,L.Wt,L.d)
+@test tril(Yt'*Zt,-1) + Diagonal(L.d.^(-1)) ≈ inv(chol.L)
+@test L*(tril(Yt'*Zt,-1) + Diagonal(L.d.^(-1))) ≈ I
+@test L'*(triu(Zt'*Yt,1) + Diagonal(L.d.^(-1))) ≈ I
+@test SymSemiseparableMatrices.squared_norm_cols(Yt,Zt,L.d.^(-1)) ≈ sum(inv(chol.L).^2,dims=1)'
