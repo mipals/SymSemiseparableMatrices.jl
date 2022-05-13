@@ -1,17 +1,24 @@
-# Creating generators U,V that result in a positive-definite matrix K
-t = Vector(0.1:0.1:1)
+t = Vector(0.1:0.1:10)
 n = length(t); p = 2;
-U, V = spline_kernel(t, p);
-K = SymSemiseparable(U,V);
-x = randn(K.n);
-Kfull = tril(U*V') + triu(V*U',1);
+Ut, Vt = spline_kernel(t', p)
+
+K = SymSemiseparableMatrix(Ut,Vt)
+x = randn(size(K,1))
+Kfull = Matrix(K)
 
 # Testing multiplication
-@test isapprox(K*x, Kfull*x, atol = 1e-6)
-
-# Testing multiplication with the adjoint operator
-@test isapprox(K'*x, Kfull'*x, atol = 1e-6)
+@test K*x ≈ Kfull*x
+@test K'*x ≈ Kfull'*x
 
 # Testing linear solves
-@test isapprox(K*(K\x),x, atol=1e-6)
-@test isapprox(K'*(K'\x),x, atol=1e-6)
+@test K\x ≈ Kfull\x
+
+# Testing (log)determinant
+@test logdet(K) ≈ logdet(Kfull)
+@test det(K) ≈ det(Kfull)
+
+# Testing show
+@test Matrix(K) ≈ tril(Ut'*Vt) + triu(Vt'*Ut,1)
+@test Kfull[3,1] ≈ K[3,1]
+@test Kfull[2,2] ≈ K[2,2]
+@test Kfull[1,3] ≈ K[1,3]

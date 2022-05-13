@@ -28,34 +28,14 @@ end
 
 Returns generators `U` and `V` for the spline kernel of order `p` given a list of knots `t`.
 """
-function spline_kernel(t, p)
+function spline_kernel(t::AbstractArray, p::Int)
 
-    #TO-DO
-    # Check inputs
-    # Maybe the Vector(range) can be done more eleganly.
     fp = factorial.(p-1:-1:0)
-    a = alpha(p).*fp
+    a = alpha(p).*fp;
+    Ut = (repeat(t,p,1).^Vector(p-1:-1:0))./fp;
+    Vt = (repeat(t,p,1).^Vector(p:2*p-1)).*a;
 
-    if all(diff(t) .> 0)
-        monotonic = 1
-    elseif all(diff(t) .< 0)
-        monotonic = 0
-    else
-        throw(DomainError("t is not strictly monotonic"))
-    end
-
-    if size(t,2) != 1 && size(t,1) == 1
-        t = t'
-    end
-    if monotonic == 1;
-        U = (repeat(t,1,p).^Vector(p-1:-1:0)')./fp'
-        V = (repeat(t,1,p).^Vector(p:2*p-1)').*a'
-    elseif monotonic == 0
-        U = (repeat(t,1,p).^Vector(p:2*p-1)')./fp'
-        V = (repeat(t,1,p).^Vector(p-1:-1:0)').*a'
-    end
-
-    return U,V
+    return Ut,Vt
 end
 
 """

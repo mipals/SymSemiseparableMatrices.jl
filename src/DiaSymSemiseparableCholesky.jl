@@ -9,24 +9,60 @@ function DiaSymSemiseparableCholesky(U::AbstractArray, V::AbstractArray, σn, σ
     W, dbar = dss_create_wdbar(σf*U, σf*V, ones(n)*σn^2)
     return DiaSymSemiseparableCholesky(n, p, σf*U, W, dbar)
 end
-function DiaSymSemiseparableCholesky(L::DiaSymSemiseparable)
-    W, dbar = dss_create_wdbar(L.U, L.V, L.d)
-    return DiaSymSemiseparableCholesky(L.n, L.p, L.U, W, dbar)
+function DiaSymSemiseparableCholesky(L::DiaSymSemiseparableMatrix)
+    W, dbar = dss_create_wdbar(L.Ut, L.Vt, L.d)
+    return DiaSymSemiseparableCholesky(L.n, L.p, L.Ut, W, dbar)
+end
+
+#==========================================================================================
+                        Defining Matrix Properties
+==========================================================================================#
+Matrix(K::DiaSymSemiseparableCholesky) = getproperty(K,:L)
+size(K::DiaSymSemiseparableCholesky) = (K.n, K.n)
+size(K::DiaSymSemiseparableCholesky,d::Int) = (1 <= d && d <=2) ? size(K)[d] : throw(ArgumentError("Invalid dimension $d"))
+
+function getindex(K::DiaSymSemiseparableCholesky, i::Int, j::Int)
+	i > j && return dot(K.Ut[:,i], K.Wt[:,j])
+	i == j && return K.d[i]
+	return 0
+end
+
+function getproperty(K::DiaSymSemiseparableCholesky, d::Symbol)
+    if d === :U
+        return UpperTriangular(triu(K.Wt'*K.Ut,1) + Diagonal(K.d))
+    elseif d === :L
+        return LowerTriangular(tril(K.Ut'*K.Wt,-1) + Diagonal(K.d))
+    else
+        return getfield(K, d)
+    end
+end
+
+Base.propertynames(F::DiaSymSemiseparableCholesky, private::Bool=false) =
+    (:U, :L, (private ? fieldnames(typeof(F)) : ())...)
+
+function Base.show(io::IO, mime::MIME{Symbol("text/plain")},
+		 K::DiaSymSemiseparableCholesky{<:Any,<:AbstractArray,<:AbstractArray,<:AbstractArray})
+    summary(io, K); println(io)
+    show(io, mime, K.L)
 end
 #==========================================================================================
                     Defining multiplication and inverse
 ==========================================================================================#
 function mul!(y::AbstractArray, L::DiaSymSemiseparableCholesky, b::AbstractArray) 
-    dss_tri_mul!(y, L.U, L.W, L.ds, b)
+    dss_tri_mul!(y, L.Ut, L.Wt, L.d, b)
+    return y
 end
-function mul!(y::AbstractArray, L::AdjointOperator{DiaSymSemiseparableCholesky}, b::AbstractArray)
-    dssa_tri_mul!(y, L.A.U, L.A.W, L.A.ds, b)
+function mul!(y::AbstractArray, L::Adjoint{<:Any,<:DiaSymSemiseparableCholesky}, b::AbstractArray)
+    dssa_tri_mul!(y, L.parent.Ut, L.parent.Wt, L.parent.d, b)
+    return y
 end
 function inv!(y::AbstractArray, L::DiaSymSemiseparableCholesky, b::AbstractArray) 
-    dss_forward!(y, L.U, L.W, L.ds, b)
+    dss_forward!(y, L.Ut, L.Wt, L.d, b)
+    return y
 end
-function inv!(y::AbstractArray, L::AdjointOperator{DiaSymSemiseparableCholesky}, b::AbstractArray) 
-    dssa_backward!(y, L.A.U, L.A.W, L.A.ds, b)
+function inv!(y::AbstractArray, L::Adjoint{<:Any,<:DiaSymSemiseparableCholesky}, b::AbstractArray) 
+    dssa_backward!(y, L.parent.Ut, L.parent.Wt, L.parent.d, b)
+    return y
 end
 
 #### Inverse of a EGRQSCholesky using the Cholesky factorization ####
@@ -41,23 +77,23 @@ end
                         Relevant Linear Algebra Routines
 ==========================================================================================#
 function fro_norm_L(L::DiaSymSemiseparableCholesky)
-	return sum(squared_norm_cols(L.U, L.W, L.ds))
+	return sum(squared_norm_cols(L.Ut, L.Wt, L.d))
 end
 
 function trinv(L::DiaSymSemiseparableCholesky)
-	dbar = L.ds
-	Y, Z = dss_create_yz(L.U, L.W, dbar)
+	dbar = L.d
+	Y, Z = dss_create_yz(L.Ut, L.Wt, dbar)
 	return sum(squared_norm_cols(Y,Z, dbar.^(-1)))
 end
 function tr(L::DiaSymSemiseparableCholesky)
-	return sum(L.ds)
+	return sum(L.d)
 end
-function tr(Ky::DiaSymSemiseparableCholesky, K::SymSemiseparable)
+function tr(Ky::DiaSymSemiseparableCholesky, K::SymSemiseparableMatrix)
 	p = Ky.p
-	c = Ky.ds
-	U = K.U
-	V = K.V
-	Y, Z = dss_create_yz(Ky.U, Ky.W, Ky.ds)
+	c = Ky.d
+	U = K.Ut
+	V = K.Vt
+	Y, Z = dss_create_yz(Ky.Ut, Ky.Wt, Ky.d)
 	b = 0.0
 	P = zeros(p,p)
 	R = zeros(p,p)
@@ -82,16 +118,16 @@ end
 Computes `W` and `dbar` such that, `L = tril(UW',-1) + diag(ds)`.
 """
 function dss_create_wdbar(U, V, d)
-    n, m = size(U)
+    m, n = size(U)
     P  = zeros(m, m)
-    W  = zeros(n, m)
+    W  = zeros(m, n)
     dbar = zeros(n)
     for i = 1:n
-        tmpU  = @view U[i,:]
-        tmpW  = V[i,:] - P*tmpU
+        tmpU  = @view U[:,i]
+        tmpW  = V[:,i] - P*tmpU
         tmpds = sqrt(tmpU'*tmpW + d[i])
         tmpW  = tmpW/tmpds
-        W[i,:] = tmpW
+        W[:,i] = tmpW
         dbar[i] = tmpds
         P += tmpW*tmpW'
     end
@@ -99,12 +135,12 @@ function dss_create_wdbar(U, V, d)
 end
 #### Multiplying with Ld ####
 function dss_tri_mul!(Y,U,W,ds,X)
-    n, m = size(U)
+    m, n = size(U)
     mx = size(X, 2)
     Wbar = zeros(m, mx)
     @inbounds for i = 1:n
-        tmpW = @view W[i,:]
-        tmpU = @view U[i,:]
+        tmpW = @view W[:,i]
+        tmpU = @view U[:,i]
         tmpX = @view X[i:i,:]
         Y[i,:] = tmpU'*Wbar + ds[i]*tmpX
         Wbar  += tmpW*tmpX
@@ -112,12 +148,12 @@ function dss_tri_mul!(Y,U,W,ds,X)
 end
 #### Adjoint of Ld ####
 function dssa_tri_mul!(Y,U,W,ds,X)
-    n, m = size(U)
+    m, n = size(U)
     mx = size(X, 2)
     Ubar = zeros(m,mx)
     @inbounds for i = n:-1:1
-        tmpW = @view W[i,:]
-        tmpU = @view U[i,:]
+        tmpW = @view W[:,i]
+        tmpU = @view U[:,i]
         tmpX = @view X[i:i,:]
         Y[i,:] = tmpW'*Ubar + ds[i]*tmpX;
         Ubar = Ubar + tmpU*tmpX;
@@ -125,24 +161,24 @@ function dssa_tri_mul!(Y,U,W,ds,X)
 end
 #### Forward substitution ####
 function dss_forward!(X,U,W,ds,B)
-    n, m = size(U)
+    m, n = size(U)
     mx = size(B,2)
     Wbar = zeros(m,mx)
     @inbounds for i = 1:n
-        tmpU = @view U[i,:]
-        tmpW = @view W[i,:]
+        tmpU = @view U[:,i]
+        tmpW = @view W[:,i]
         X[i:i,:] = (B[i:i,:] - tmpU'*Wbar)/ds[i]
         Wbar += tmpW .* X[i:i,:]
     end
 end
 #### Backward substitution ####
 function dssa_backward!(X,U,W,ds,B)
-    n, m = size(U)
+    m, n = size(U)
     mx = size(B,2)
     Ubar = zeros(m,mx)
     @inbounds for i = n:-1:1
-        tmpU = @view U[i,:]
-        tmpW = @view W[i,:]
+        tmpU = @view U[:,i]
+        tmpW = @view W[:,i]
         X[i:i,:] = (B[i:i,:] - tmpW'*Ubar)/ds[i]
         Ubar += tmpU .* X[i:i,:]
     end
@@ -150,12 +186,12 @@ end
 
 #### Squared norm of columns of L = tril(UW',-1) + diag(dbar) ####
 function squared_norm_cols(U,W,dbar)
-    n, m = size(U)
+    m, n = size(U)
     P = zeros(m, m)
     c = zeros(n)
     @inbounds for i = n:-1:1
-        tmpW = @view W[i,:]
-        tmpU = @view U[i,:]
+        tmpW = @view W[:,i]
+        tmpU = @view U[:,i]
         c[i]  = dbar[i]^2 + tmpW'*P*tmpW
         P += tmpU*tmpU'
     end
@@ -163,7 +199,7 @@ function squared_norm_cols(U,W,dbar)
 end
 #### Implicit inverse of  L = tril(UW',-1) + diag(dbar) ####
 function dss_create_yz(U, W,dbar)
-    n, m = size(U)
+    m, n = size(U)
     Y = zeros(n,m)
     Z = zeros(n,m)
     dss_forward!(Y, U, W, dbar, U)
@@ -173,5 +209,5 @@ function dss_create_yz(U, W,dbar)
 end
 #### Log-determinant ####
 dss_logdet(d) = sum(log,d)
-newlogdet(L::DiaSymSemiseparableCholesky) = dss_logdet(L.ds)
-newlogdet(L::AdjointOperator{DiaSymSemiseparableCholesky}) = dss_logdet(L.A.ds)
+newlogdet(L::DiaSymSemiseparableCholesky) = dss_logdet(L.d)
+newlogdet(L::Adjoint{<:Any,<:DiaSymSemiseparableCholesky}) = dss_logdet(L.parent.d)
