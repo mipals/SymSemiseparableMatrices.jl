@@ -21,7 +21,7 @@ end
 ==========================================================================================#
 Matrix(K::DiaSymSemiseparableMatrix) = tril(K.Ut'*K.Vt) + triu(K.Vt'*K.Ut,1) + Diagonal(K.d)
 size(K::DiaSymSemiseparableMatrix)   = (K.n,K.n)
-cholesky(K::DiaSymSemiseparableMatrix) = DiaSymSemiseparableCholesky(K)
+LinearAlgebra.cholesky(K::DiaSymSemiseparableMatrix) = DiaSymSemiseparableCholesky(K)
 function getindex(K::DiaSymSemiseparableMatrix{T}, i::Int, j::Int) where T
 	i > j && return dot(K.Ut[:,i],K.Vt[:,j])
 	j == i && return dot(K.Vt[:,i],K.Ut[:,j]) + K.d[i]

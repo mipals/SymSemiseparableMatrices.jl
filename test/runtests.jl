@@ -1,7 +1,6 @@
 using SymSemiseparableMatrices
 using Test
 using LinearAlgebra
-
 import SymSemiseparableMatrices: spline_kernel, spline_kernel_matrix
 
 @testset "SymSemiseparableMatrices.jl" begin

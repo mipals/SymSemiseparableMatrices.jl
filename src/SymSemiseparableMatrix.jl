@@ -16,7 +16,11 @@ end
 ==========================================================================================#
 Matrix(K::SymSemiseparableMatrix)   = tril(K.Ut'*K.Vt) + triu(K.Vt'*K.Ut,1)
 size(K::SymSemiseparableMatrix)     = (K.n,K.n)
-cholesky(K::SymSemiseparableMatrix) = SymSemiseparableCholesky(K)
+LinearAlgebra.cholesky(K::SymSemiseparableMatrix) = SymSemiseparableCholesky(K)
+function LinearAlgebra.cholesky(K::SymSemiseparableMatrix, sigma)
+	Wt, dbar = dss_create_wdbar(K.Ut,K.Vt,ones(K.n)*sigma)
+	return DiaSymSemiseparableCholesky(K.n,K.p,K.Ut,Wt,dbar,)
+end
 function getindex(K::SymSemiseparableMatrix{T}, i::Int, j::Int) where T
 	i > j && return dot(K.Ut[:,i],K.Vt[:,j])
 	return dot(K.Ut[:,j],K.Vt[:,i])

@@ -4,7 +4,7 @@
 [![Codecov](https://codecov.io/gh/mipals/SymSemiseparableMatrices.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/mipals/SymSemiseparableMatrices.jl)
 
 ## Description
-A package for efficiently computing with symmetric extended generator representable semiseparable matrices and a variant thereof. In short this means matrices of the form
+A package for efficiently computing with symmetric extended generator representable semiseparable matrices (EGRSS Matrices) and a varient with added diagonal terms. In short this means matrices of the form
 ```julia
 K = tril(U*V^T) + triu(V*U^T,1)
 ```
@@ -66,7 +66,7 @@ julia> K'*x
  12.65317083333333  
 ```
 
-Furthermore from the ```SymEGRSSMatrix``` structure we can efficiently compute the Cholesky factorization as
+Furthermore from the ```SymSemiseparableMatrix``` structure we can efficiently compute the Cholesky factorization as
 ```julia 
 julia> L = cholesky(K); # Computing the Cholesky factorization of K
 julia> K*(L'\(L\x))
@@ -86,18 +86,18 @@ julia> K*(L'\(L\x))
 ```
 Now ```L``` represents a Cholesky factorization with of form ```L = tril(UW')```, requiring only ```O(np)``` storage. 
 
-A struct for the dealing with symmetric matrices of the form, ```K = tril(UV') + triu(VU',1) + diag(d)``` called ```SymEGRQSMatrix``` is also implemented. The usage is similar to that of ```SymEGRSSMatrix``` and can be created as follows
+A struct for the dealing with symmetric matrices of the form, ```K = tril(UV') + triu(VU',1) + diag(d)``` called ```DiaSymSemiseparableMatrix``` is also implemented. The usage is similar to that of ```DiaSymSemiseparableMatrix``` and can be created as follows
 ```julia
 julia> U, V = spline_kernel(Vector(0.1:0.01:1)', 2); # Creating input such that K is PD
-julia> K = SymEGRQSMatrix(U,V,rand(size(U,2)); # Symmetric EGRSS matrix + diagonal
+julia> K = DiaSymSemiseparableMatrix(U,V,rand(size(U,2)); # Symmetric EGRSS matrix + diagonal
 ```
 The Cholesky factorization of this matrix can be computed using ```cholesky```. Note however here that ```L``` represents a matrix of the form ```L = tril(UW',-1) + diag(c)```
 
 ## Benchmarks
 ### Computing Cholesky factorization of ```K = tril(UV') + triu(VU',1)```
-![Scaling of the Cholesky factorization of an EGRSS matrix](https://i.imgur.com/NFqfreO.png)
+![Scaling of the Cholesky factorization of an SymSemiseparableMatrix matrix](https://i.imgur.com/NFqfreO.png)
 ### Computing Cholesky factorization of ```K = tril(UV') + triu(VU',1) + diag(d)```
-![Scaling of the Cholesky factorization of an EGRQS matrix](https://i.imgur.com/IuupJSP.png)
+![Scaling of the Cholesky factorization of an DiaSymSemiseparableMatrix matrix](https://i.imgur.com/IuupJSP.png)
 ### Solving linear systems using a Cholesky factorization with the form ```L = tril(UW')```
 ![Solving a system using the implicit Cholesky factorization](https://i.imgur.com/mYBNTSr.png)
 

@@ -13,7 +13,6 @@ function DiaSymSemiseparableCholesky(L::DiaSymSemiseparableMatrix)
     W, dbar = dss_create_wdbar(L.Ut, L.Vt, L.d)
     return DiaSymSemiseparableCholesky(L.n, L.p, L.Ut, W, dbar)
 end
-
 #==========================================================================================
                         Defining Matrix Properties
 ==========================================================================================#

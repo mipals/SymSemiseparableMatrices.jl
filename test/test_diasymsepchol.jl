@@ -1,6 +1,3 @@
-using SymSemiseparableMatrices, LinearAlgebra, Test
-import SymSemiseparableMatrices: spline_kernel, spline_kernel_matrix
-
 # Removing t = 0, such that Σ is invertible
 n = 500.0;
 t = Vector(0.1:1/n:1)
