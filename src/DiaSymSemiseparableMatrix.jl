@@ -33,21 +33,35 @@ Base.propertynames(F::DiaSymSemiseparableMatrix, private::Bool=false) =
 #==========================================================================================
                         Defining multiplication and inverse
 ==========================================================================================#
-function mul!(y::AbstractArray, L::DiaSymSemiseparableMatrix, b::AbstractArray)
+function LinearAlgebra.mul!(y::AbstractArray, L::DiaSymSemiseparableMatrix, b::AbstractArray)
     dss_mul_mat!(y, L.Ut, L.Vt, L.d, b)
     return y
 end
-function mul!(y::AbstractArray, L::Adjoint{<:Any,<:DiaSymSemiseparableMatrix}, b::AbstractArray)
+function LinearAlgebra.mul!(y::AbstractArray, L::Adjoint{<:Any,<:DiaSymSemiseparableMatrix}, b::AbstractArray)
     dss_mul_mat!(y, L.parent.Ut, L.parent.Vt, L.parent.d, b)
     return y
 end
-function inv!(y, K::DiaSymSemiseparableMatrix, b::AbstractArray)
+function LinearAlgebra.ldiv!(y::AbstractArray, K::DiaSymSemiseparableMatrix, b::AbstractArray)
 	L = DiaSymSemiseparableCholesky(K)
-	y[:,:] = L'\(L\b)
+	y .= L'\(L\b)
+    return y
 end
-function inv!(y, K::Adjoint{<:Any,<:DiaSymSemiseparableMatrix}, b::AbstractArray)
+function LinearAlgebra.ldiv!(y::AbstractArray, K::Adjoint{<:Any,<:DiaSymSemiseparableMatrix}, b::AbstractArray)
 	L = DiaSymSemiseparableCholesky(K.parent)
-	y[:,:] = L'\(L\b)
+	y .= L'\(L\b)
+    return y
+end
+function (Base.:\)(K::DiaSymSemiseparableMatrix, b::AbstractVecOrMat)
+    y = similar(b)
+	L = DiaSymSemiseparableCholesky(K)
+	y .= L'\(L\b)
+    return y
+end
+function (Base.:\)(K::Adjoint{<:Any,<:DiaSymSemiseparableMatrix}, b::AbstractVecOrMat)
+    y = similar(b)
+	L = DiaSymSemiseparableCholesky(K.parent)
+	y .= L'\(L\b)
+    return y
 end
 
 #===========================================================================================

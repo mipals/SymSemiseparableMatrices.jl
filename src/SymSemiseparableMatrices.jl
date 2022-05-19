@@ -35,17 +35,11 @@ struct DiaSymSemiseparableCholesky{T,UU<:AbstractMatrix{T},WW<:AbstractMatrix{T}
     d::dd
 end
 
-# Properties
-# include("adjointoperator.jl")
-
 # Matrices
 include("SymSemiseparableMatrix.jl")
 include("SymSemiseparableCholesky.jl")
 include("DiaSymSemiseparableMatrix.jl")
 include("DiaSymSemiseparableCholesky.jl")
-
-# Operator overloadings
-# include("operator_overloading.jl")
 
 # Spline Kernel
 include("spline_kernel.jl")

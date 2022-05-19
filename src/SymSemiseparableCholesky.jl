@@ -15,8 +15,8 @@ end
                         Defining Matrix Properties
 ==========================================================================================#
 Matrix(K::SymSemiseparableCholesky) = getproperty(K,:L)
-size(K::SymSemiseparableCholesky) = (K.n, K.n)
-size(K::SymSemiseparableCholesky, d::Int) = (1 <= d && d <=2) ? size(K)[d] : throw(ArgumentError("Invalid dimension $d"))
+Base.size(K::SymSemiseparableCholesky) = (K.n, K.n)
+Base.size(K::SymSemiseparableCholesky, d::Int) = (1 <= d && d <=2) ? size(K)[d] : throw(ArgumentError("Invalid dimension $d"))
 
 function getindex(K::SymSemiseparableCholesky, i::Int, j::Int)
 	i >= j && return dot(K.Ut[:,i], K.Wt[:,j])
@@ -47,30 +47,38 @@ end
 #==========================================================================================
                         Defining multiplication and inverse
 ==========================================================================================#
-function mul!(y::AbstractArray, L::SymSemiseparableCholesky, b::AbstractArray)
+function LinearAlgebra.mul!(y::AbstractArray, L::SymSemiseparableCholesky, b::AbstractArray)
 	ss_tri_mul!(y, L.Ut,   L.Wt,   b)
     return y
 end
-function mul!(y::AbstractArray, L::Adjoint{<:Any,<:SymSemiseparableCholesky}, b::AbstractArray)
+function LinearAlgebra.mul!(y::AbstractArray, L::Adjoint{<:Any,<:SymSemiseparableCholesky}, b::AbstractArray)
 	ssa_tri_mul!(y, L.parent.Ut, L.parent.Wt, b)
     return y
 end
-function (\)(F::SymSemiseparableCholesky, B::AbstractVecOrMat)
-	X = similar(B)
-	ss_forward!(X,F.Ut,F.Wt,B)
-	return X
+function LinearAlgebra.ldiv!(y::AbstractArray,F::SymSemiseparableCholesky, b::AbstractArray)
+	ss_forward!(y,F.Ut,F.Wt,b)
+	return y
 end
-function (\)(F::Adjoint{<:Any,<:SymSemiseparableCholesky}, B::AbstractVecOrMat)
-	Y = similar(B)
-	ssa_backward!(Y,F.parent.Ut,F.parent.Wt,B)
+function LinearAlgebra.ldiv!(y::AbstractArray,F::Adjoint{<:Any,<:SymSemiseparableCholesky}, b::AbstractArray)
+	ssa_backward!(y,F.parent.Ut,F.parent.Wt,b)
 	return Y
+end
+function (Base.:\)(F::SymSemiseparableCholesky, b::AbstractVecOrMat)
+    y = similar(b)
+	ss_forward!(y,F.Ut,F.Wt,b)
+	return y
+end
+function (Base.:\)(F::Adjoint{<:Any,<:SymSemiseparableCholesky}, b::AbstractVecOrMat)
+    y = similar(b)
+	ssa_backward!(y,F.parent.Ut,F.parent.Wt,b)
+	return y
 end
 
 newlogdet(L::SymSemiseparableCholesky) = ss_logdet(L.Ut, L.Wt)
 newlogdet(L::Adjoint{<:Any,<:SymSemiseparableCholesky}) = ss_logdet(L.parent.Ut, L.parent.Wt)
 
 
-function det(L::SymSemiseparableCholesky)
+function LinearAlgebra.det(L::SymSemiseparableCholesky)
     dd = one(eltype(L))
     @inbounds for i in 1:L.n
         dd *= dot(L.Ut[:,i],L.Wt[:,i])
@@ -78,7 +86,7 @@ function det(L::SymSemiseparableCholesky)
     return dd
 end
 
-function logdet(L::SymSemiseparableCholesky)
+function LinearAlgebra.logdet(L::SymSemiseparableCholesky)
     dd = zero(eltype(L))
     @inbounds for i in 1:L.n
         dd += log(dot(L.Ut[:,i],L.Wt[:,i]))

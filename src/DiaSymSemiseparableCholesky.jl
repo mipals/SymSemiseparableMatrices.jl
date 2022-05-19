@@ -16,9 +16,9 @@ end
 #==========================================================================================
                         Defining Matrix Properties
 ==========================================================================================#
-Matrix(K::DiaSymSemiseparableCholesky) = getproperty(K,:L)
-size(K::DiaSymSemiseparableCholesky) = (K.n, K.n)
-size(K::DiaSymSemiseparableCholesky,d::Int) = (1 <= d && d <=2) ? size(K)[d] : throw(ArgumentError("Invalid dimension $d"))
+Base.Matrix(K::DiaSymSemiseparableCholesky) = getproperty(K,:L)
+Base.size(K::DiaSymSemiseparableCholesky) = (K.n, K.n)
+Base.size(K::DiaSymSemiseparableCholesky,d::Int) = (1 <= d && d <=2) ? size(K)[d] : throw(ArgumentError("Invalid dimension $d"))
 
 function getindex(K::DiaSymSemiseparableCholesky, i::Int, j::Int)
 	i > j && return dot(K.Ut[:,i], K.Wt[:,j])
@@ -47,19 +47,29 @@ end
 #==========================================================================================
                     Defining multiplication and inverse
 ==========================================================================================#
-function mul!(y::AbstractArray, L::DiaSymSemiseparableCholesky, b::AbstractArray) 
+function LinearAlgebra.mul!(y::AbstractArray, L::DiaSymSemiseparableCholesky, b::AbstractArray) 
     dss_tri_mul!(y, L.Ut, L.Wt, L.d, b)
     return y
 end
-function mul!(y::AbstractArray, L::Adjoint{<:Any,<:DiaSymSemiseparableCholesky}, b::AbstractArray)
+function LinearAlgebra.mul!(y::AbstractArray, L::Adjoint{<:Any,<:DiaSymSemiseparableCholesky}, b::AbstractArray)
     dssa_tri_mul!(y, L.parent.Ut, L.parent.Wt, L.parent.d, b)
     return y
 end
-function inv!(y::AbstractArray, L::DiaSymSemiseparableCholesky, b::AbstractArray) 
+function LinearAlgebra.ldiv!(y::AbstractArray, L::DiaSymSemiseparableCholesky, b::AbstractArray) 
     dss_forward!(y, L.Ut, L.Wt, L.d, b)
     return y
 end
-function inv!(y::AbstractArray, L::Adjoint{<:Any,<:DiaSymSemiseparableCholesky}, b::AbstractArray) 
+function LinearAlgebra.ldiv!(y::AbstractArray, L::Adjoint{<:Any,<:DiaSymSemiseparableCholesky}, b::AbstractArray) 
+    dssa_backward!(y, L.parent.Ut, L.parent.Wt, L.parent.d, b)
+    return y
+end
+function (Base.:\)(L::DiaSymSemiseparableCholesky, b::AbstractVecOrMat) 
+    y = similar(b)
+    dss_forward!(y, L.Ut, L.Wt, L.d, b)
+    return y
+end
+function (Base.:\)(L::Adjoint{<:Any,<:DiaSymSemiseparableCholesky}, b::AbstractVecOrMat) 
+    y = similar(b)
     dssa_backward!(y, L.parent.Ut, L.parent.Wt, L.parent.d, b)
     return y
 end

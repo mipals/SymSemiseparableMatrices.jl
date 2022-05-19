@@ -29,8 +29,8 @@ First we need to create generators U and V that represent the symmetric matrix, 
 ```julia
 julia> using SymSemiseparableMatrices
 julia> import SymSemiseparableMatrices: spline_kernel
-julia> U, V = spline_kernel(Vector(0.1:0.01:1), 2); # Creating input such that K is PD
-julia> K = SymSemiseparable(U,V); # Symmetric generator representable semiseparable matrix
+julia> U, V = spline_kernel(Vector(0.1:0.01:1)', 2); # Creating input such that K is PD
+julia> K = SymSemiseparableMatrix(U,V); # Symmetric generator representable semiseparable matrix
 julia> x = ones(size(K)); # Test vector
 ```
 We can now compute products with ```K``` and ```K'```. The result are the same as ```K``` is symmetric.

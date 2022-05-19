@@ -1,62 +1,33 @@
-using SymSemiseparableMatrices, LinearAlgebra, Test
+using SymSemiseparableMatrices
+using Test
+using LinearAlgebra
 import SymSemiseparableMatrices: spline_kernel, spline_kernel_matrix
 
 # Removing t = 0, such that Σ is invertible
-n = 500.0;
-t = Vector(0.1:1/n:1)
-
-# Creating a test matrix Σ = tril(UV') + triu(VU',1) that is PSD
+t = Vector(0.1:0.1:100)
 p = 2
+
+# Creating generators U,V that result in a positive-definite matrix Σ
 Ut, Vt = spline_kernel(t', p)
-K  = DiaSymSemiseparableMatrix(Ut,Vt,ones(size(Ut,2)))
-Σ    = Matrix(K)
-chol = cholesky(Σ)
-L = cholesky(K)
+
+K = DiaSymSemiseparableMatrix(Ut,Vt,ones(size(Ut,2)))
 x = randn(size(K,1))
+Kfull = Matrix(K)
 
-# Testing inverses (Using Cholesky factorizations)
-B = randn(length(t),10)
-@test L\B  ≈ chol.L\B
-@test L'\B ≈ chol.U\B
-@test L*B  ≈ chol.L*B
-@test L'*B ≈ chol.U*B
+# Testing multiplication
+@test K*x ≈ Kfull*x
+@test K'*x ≈ Kfull'*x
 
-# Testing logdet
-@test logdet(L) ≈ logdet(chol.L)
-@test det(L) ≈ det(chol.L)
+# Testing linear solve
+@test K\x ≈ Kfull\x
 
-# Testing traces and norm
-M = SymSemiseparableMatrix(Ut,Vt)
-Ky = L
-K = M
-U = K.Ut
-V = K.Vt
-c = Ky.d
-Y, Z = SymSemiseparableMatrices.dss_create_yz(Ky.Ut, Ky.Wt, Ky.d)
-b = 0.0
-P = zeros(p,p)
-R = zeros(p,p)
-
-
-@test isapprox(tr(L,M), tr(chol\Matrix(M)), atol=1e-6)
-# @test trinv(L) ≈ tr(chol\Diagonal(ones(size(L,1))))
-# @test SymEGRSSMatrices.fro_norm_L(L) ≈ norm(chol.L[:])^2
+# Testing (log)determinant
+@test logdet(K) ≈ logdet(Kfull)
+@test det(K) ≈ det(Kfull)
 
 # Testing show
-@test L.L ≈ tril(Ut'*L.Wt,-1) + Diagonal(L.d)
-@test L.U ≈ triu(L.Wt'*Ut,1) + Diagonal(L.d)
-@test Matrix(L) ≈ tril(L.Ut'*L.Wt,-1) + Diagonal(L.d)
-@test L[3,1] ≈ chol.L[3,1]
-@test L[2,2] ≈ chol.L[2,2]
-@test L[1,3] ≈ chol.L[1,3]
+@test Matrix(K) ≈ tril(K.Ut'*K.Vt) + triu(K.Vt'*K.Ut,1) + Diagonal(K.d)
+@test Kfull[3,1] ≈ K[3,1]
+@test Kfull[2,2] ≈ K[2,2]
+@test Kfull[1,3] ≈ K[1,3]
 
-
-# # Testing explicit-implicit-inverse
-U = L.Ut
-W = L.Wt
-dbar = L.d
-Yt, Zt = SymSemiseparableMatrices.dss_create_yz(L.Ut,L.Wt,L.d)
-@test tril(Yt'*Zt,-1) + Diagonal(L.d.^(-1)) ≈ inv(chol.L)
-@test L*(tril(Yt'*Zt,-1) + Diagonal(L.d.^(-1))) ≈ I
-@test L'*(triu(Zt'*Yt,1) + Diagonal(L.d.^(-1))) ≈ I
-@test SymSemiseparableMatrices.squared_norm_cols(Yt,Zt,L.d.^(-1)) ≈ sum(inv(chol.L).^2,dims=1)'
