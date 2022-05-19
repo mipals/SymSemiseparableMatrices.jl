@@ -74,10 +74,6 @@ function (Base.:\)(F::Adjoint{<:Any,<:SymSemiseparableCholesky}, b::AbstractVecO
 	return y
 end
 
-newlogdet(L::SymSemiseparableCholesky) = ss_logdet(L.Ut, L.Wt)
-newlogdet(L::Adjoint{<:Any,<:SymSemiseparableCholesky}) = ss_logdet(L.parent.Ut, L.parent.Wt)
-
-
 function LinearAlgebra.det(L::SymSemiseparableCholesky)
     dd = one(eltype(L))
     @inbounds for i in 1:L.n
@@ -186,12 +182,4 @@ function ssa_backward!(X, U, W, B)
         X[i,:] = (B[i:i,:] - tmpW'*Ubar)/(tmpU'*tmpW)
         Ubar += tmpU .* X[i:i,:]
     end
-end
-#### Logarithm of determinant ####
-function ss_logdet(U, W)
-    a = 0.0
-    @inbounds for i = 1:size(U, 1)
-        a += log(dot(U[i,:],W[i,:]))
-    end
-    return a
 end

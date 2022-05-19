@@ -219,4 +219,6 @@ end
 #### Log-determinant ####
 dss_logdet(d) = sum(log,d)
 newlogdet(L::DiaSymSemiseparableCholesky) = dss_logdet(L.d)
+LinearAlgebra.logdet(L::DiaSymSemiseparableCholesky) = dss_logdet(L.d)
 newlogdet(L::Adjoint{<:Any,<:DiaSymSemiseparableCholesky}) = dss_logdet(L.parent.d)
+LinearAlgebra.logdet(L::Adjoint{<:Any,<:DiaSymSemiseparableCholesky}) = dss_logdet(L.parent.d)
