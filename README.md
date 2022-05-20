@@ -5,6 +5,7 @@
 
 ## Description
 A package for efficiently computing with symmetric extended generator representable semiseparable matrices (EGRSS Matrices) and a varient with added diagonal terms. In short this means matrices of the form
+
 $$
 K = \text{\textbf{tril}}(UV^\top) + \text{\textbf{triu}}\left(VU^\top,1\right), \quad U,V\in\mathbb{R}^{p\times n}
 $$
