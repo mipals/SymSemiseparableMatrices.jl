@@ -35,6 +35,9 @@ struct DiaSymSemiseparableCholesky{T,UU<:AbstractMatrix{T},WW<:AbstractMatrix{T}
     d::dd
 end
 
+# Utility functions
+include("utility_functions.jl")
+
 # Matrices
 include("SymSemiseparableMatrix.jl")
 include("SymSemiseparableCholesky.jl")
@@ -44,7 +47,7 @@ include("DiaSymSemiseparableCholesky.jl")
 # Spline Kernel
 include("spline_kernel.jl")
 
-# Exporting Relevant 
+# Exporting Relevant
 export SymSemiseparableMatrix, SymSemiseparableCholesky
 export DiaSymSemiseparableMatrix, DiaSymSemiseparableCholesky
 export trinv

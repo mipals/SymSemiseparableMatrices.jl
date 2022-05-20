@@ -5,18 +5,15 @@
 
 ## Description
 A package for efficiently computing with symmetric extended generator representable semiseparable matrices (EGRSS Matrices) and a varient with added diagonal terms. In short this means matrices of the form
-```julia
-K = tril(U*V^T) + triu(V*U^T,1)
-```
+$$
+K = \text{\textbf{tril}}(UV^\top) + \text{\textbf{triu}}\left(VU^\top,1\right), \quad U,V\in\mathbb{R}^{p\times n}
+$$
 
-as well as
+$$
+K = \text{\textbf{tril}}(UV^\top) + \text{\textbf{triu}}\left(VU^\top,1\right) + \text{\textbf{diag}}(d), \quad U,V\in\mathbb{R}^{p\times n},\ d\in\mathbb{R}^n
+$$
 
-
-```julia
-K = tril(U*V^T) + triu(V*U^T,1) + diag(d)
-```
-
-All implemented algorithms (multiplication, Cholesky factorization, forward/backward substitution as well as various traces and determinants) run linear in time and memory w.r.t. to the number of data points ```n```.
+All implemented algorithms (multiplication, Cholesky factorization, forward/backward substitution as well as various traces and determinants) scales with $O(p^kn)$. Since $p \ll n$ this result in very scalable computations.
 
 A more in-depth descriptions of the algorithms can be found in [1] or [here](https://github.com/mipals/SmoothingSplines.jl/blob/master/mt_mikkel_paltorp.pdf).
 
@@ -33,7 +30,7 @@ julia> U, V = spline_kernel(Vector(0.1:0.01:1)', 2); # Creating input such that 
 julia> K = SymSemiseparableMatrix(U,V); # Symmetric generator representable semiseparable matrix
 julia> x = ones(size(K)); # Test vector
 ```
-We can now compute products with ```K``` and ```K'```. The result are the same as ```K``` is symmetric.
+We can now compute products with ```K``` and ```K'```. The result are the same, since ```K``` is symmetric.
 ```julia
 julia> K*x
 91×1 Array{Float64,2}:
@@ -84,7 +81,7 @@ julia> K*(L'\(L\x))
  0.9999999999995898
  0.9999999999995764
 ```
-Now ```L``` represents a Cholesky factorization with of form ```L = tril(UW')```, requiring only ```O(np)``` storage. 
+Now ```L``` represents a Cholesky factorization with of form ```L = tril(UW')```, requiring only $O(pn)$ storage. 
 
 A struct for the dealing with symmetric matrices of the form, ```K = tril(UV') + triu(VU',1) + diag(d)``` called ```DiaSymSemiseparableMatrix``` is also implemented. The usage is similar to that of ```DiaSymSemiseparableMatrix``` and can be created as follows
 ```julia

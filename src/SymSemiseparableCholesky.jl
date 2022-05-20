@@ -12,18 +12,18 @@ function SymSemiseparableCholesky(K::SymSemiseparableMatrix)
     return SymSemiseparableCholesky(K.n, K.p, K.Ut, ss_create_w(K.Ut, K.Vt))
 end
 #==========================================================================================
-                        Defining Matrix Properties
+                    Defining Matrix Properties / Overloading Base
 ==========================================================================================#
-Matrix(K::SymSemiseparableCholesky) = getproperty(K,:L)
+Base.Matrix(K::SymSemiseparableCholesky) = getproperty(K,:L)
 Base.size(K::SymSemiseparableCholesky) = (K.n, K.n)
-Base.size(K::SymSemiseparableCholesky, d::Int) = (1 <= d && d <=2) ? size(K)[d] : throw(ArgumentError("Invalid dimension $d"))
-
-function getindex(K::SymSemiseparableCholesky, i::Int, j::Int)
+function Base.size(K::SymSemiseparableCholesky, d::Int)
+    return (1 <= d && d <=2) ? size(K)[d] : throw(ArgumentError("Invalid dimension $d"))
+end
+function Base.getindex(K::SymSemiseparableCholesky, i::Int, j::Int)
 	i >= j && return dot(K.Ut[:,i], K.Wt[:,j])
 	return 0
 end
-
-function getproperty(K::SymSemiseparableCholesky, d::Symbol)
+function Base.getproperty(K::SymSemiseparableCholesky, d::Symbol)
     if d === :U
         return UpperTriangular(K.Wt'*K.Ut)
     elseif d === :L
@@ -32,17 +32,34 @@ function getproperty(K::SymSemiseparableCholesky, d::Symbol)
         return getfield(K, d)
     end
 end
+function Base.propertynames(F::SymSemiseparableCholesky, private::Bool=false)
+    return (:U, :L, (private ? fieldnames(typeof(F)) : ())...)
+end
 
-# Base.propertynames(F::SymSemiseparableCholesky, private::Bool=false) =
-#     (:U, :L, (private ? fieldnames(typeof(F)) : ())...)
+function Base.show(io::IO, mime::MIME{Symbol("text/plain")},
+		 K::SymSemiseparableCholesky{<:Any,<:AbstractMatrix,<:AbstractMatrix})
+    summary(io, K); println(io)
+    show(io, mime, K.L)
+end
 
+#==========================================================================================
+                            Overloading LinearAlgebra routines
+==========================================================================================#
+function LinearAlgebra.det(L::SymSemiseparableCholesky)
+    dd = one(eltype(L))
+    @inbounds for i in 1:L.n
+        dd *= dot(L.Ut[:,i],L.Wt[:,i])
+    end
+    return dd
+end
 
-# function Base.show(io::IO, mime::MIME{Symbol("text/plain")},
-# 		 K::SymSemiseparableCholesky{<:Any,<:AbstractMatrix,<:AbstractMatrix})
-#     summary(io, K); println(io)
-#     show(io, mime, K.L)
-# end
-
+function LinearAlgebra.logdet(L::SymSemiseparableCholesky)
+    dd = zero(eltype(L))
+    @inbounds for i in 1:L.n
+        dd += log(dot(L.Ut[:,i],L.Wt[:,i]))
+    end
+    return dd
+end
 
 #==========================================================================================
                         Defining multiplication and inverse
@@ -74,21 +91,6 @@ function (Base.:\)(F::Adjoint{<:Any,<:SymSemiseparableCholesky}, b::AbstractVecO
 	return y
 end
 
-function LinearAlgebra.det(L::SymSemiseparableCholesky)
-    dd = one(eltype(L))
-    @inbounds for i in 1:L.n
-        dd *= dot(L.Ut[:,i],L.Wt[:,i])
-    end
-    return dd
-end
-
-function LinearAlgebra.logdet(L::SymSemiseparableCholesky)
-    dd = zero(eltype(L))
-    @inbounds for i in 1:L.n
-        dd += log(dot(L.Ut[:,i],L.Wt[:,i]))
-    end
-    return dd
-end
 #### Inverse of a SymSemiseparableCholesky using ####
 function inv(L::SymSemiseparableCholesky, b::AbstractArray)
 	return L'\(L\b)
@@ -107,30 +109,26 @@ function ss_create_w(U,V)
     p,n = size(U)
     wTw = zeros(p,p)
     W = zeros(p,n)
-    @inbounds for j = 1:n
-        tmpu = @view U[:,j]
-        tmp  = V[:,j] - wTw*tmpu
-        w = tmp/sqrt(abs(tmpu'*tmp))
-        W[:,j] = w
-        wTw = wTw + w*w'
+    @inbounds for (u,v,w) in zip(eachcol(U),eachcol(V),eachcol(W))
+        w .= (v - wTw*u)/sqrt(abs(dot(u,(v - wTw*u))))
+        add_outer_product!(wTw,w)
     end
     return W
 end
+
+
 """
     ss_tri_mul!(Y,U,W,X)
 
 Computes the multiplization `tril(U*W')*X = Y` in linear complexity.
 """
 function ss_tri_mul!(Y,U,W,X)
-    m, n = size(U)
-    mx = size(X,2)
-    Wbar = zeros(m,mx)
-    @inbounds for i = 1:n
-        tmpW   = @view W[:,i]
-        tmpU   = @view U[:,i]
-        tmpX   = @view X[i:i,:]
-        Wbar  += tmpW .* tmpX
-        Y[i,:] = Wbar'*tmpU
+    p     = size(U,1)
+    n_rhs = size(X,2)
+    Wbar  = zeros(p,n_rhs)
+    @inbounds for (w,u,y,x) in zip(eachcol(W),eachcol(U),eachrow(Y),eachrow(X))
+        add_inner_plus!(Wbar,w,x)
+        add_Y_tri!(y,Wbar,u)
     end
 end
 """
@@ -139,16 +137,10 @@ end
 Computes the multiplization `triu(W*U')*X = Y` in linear complexity.
 """
 function ssa_tri_mul!(Y,U,W,X)
-    m, n = size(U)
-    mx = size(X,2)
-    Ubar = zeros(m,mx)
-    Ubar = Ubar + U*X
-    @inbounds for i = 1:n
-        tmpW = @view W[:,i]
-        tmpU = @view U[:,i]
-        tmpX = @view X[i:i,:]
-        Y[i,:] = Ubar'*tmpW
-        Ubar  -= tmpU .* tmpX
+    Ubar = U*X
+    @inbounds for (w,u,y,x) in zip(eachcol(W),eachcol(U),eachrow(Y),eachrow(X))
+        add_Y_tri!(y,Ubar,w)
+        add_inner_minus!(Ubar,u,x)
     end
 end
 """
@@ -157,14 +149,12 @@ end
 Solves the linear system `tril(U*W')*X = B`.
 """
 function ss_forward!(X,U,W, B)
-    m, n = size(U)
-    mx = size(B,2)
-    Wbar = zeros(m, mx)
-    @inbounds for i = 1:n
-        tmpU = @view U[:,i]
-        tmpW = @view W[:,i]
-        X[i,:] = (B[i:i,:] - tmpU'*Wbar)./(tmpU'*tmpW)
-        Wbar += tmpW .* X[i:i,:]
+    p     = size(U,1)
+    n_rhs = size(B,2)
+    Wbar  = zeros(p, n_rhs)
+    @inbounds for (u,w,x,b) in zip(eachcol(U),eachcol(W),eachrow(X),eachrow(B))
+        x .= (b - Wbar'*u)/dot(u,w)
+        add_inner_plus!(Wbar,w,x)
     end
 end
 """
@@ -173,13 +163,14 @@ end
 Solves the linear system `triu(W*U')*X = Y`.
 """
 function ssa_backward!(X, U, W, B)
-    m,n = size(U)
-    mx = size(B,2)
-    Ubar = zeros(m,mx)
-    @inbounds for i = n:-1:1
-        tmpU = @view U[:,i]
-        tmpW = @view W[:,i]
-        X[i,:] = (B[i:i,:] - tmpW'*Ubar)/(tmpU'*tmpW)
-        Ubar += tmpU .* X[i:i,:]
+    p     = size(U,1)
+    n_rhs = size(B,2)
+    Ubar  = zeros(p,n_rhs)
+    @inbounds for (u,w,x,b) in zip(Iterators.reverse(eachcol(U)),
+                                   Iterators.reverse(eachcol(W)),
+                                   Iterators.reverse(eachrow(X)),
+                                   Iterators.reverse(eachrow(B)))
+        x .= (b - Ubar'w)/dot(u,w)
+        add_inner_plus!(Ubar,u,x)
     end
 end

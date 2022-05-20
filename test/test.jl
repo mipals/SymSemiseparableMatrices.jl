@@ -3,51 +3,27 @@ using Test
 using LinearAlgebra
 import SymSemiseparableMatrices: spline_kernel, spline_kernel_matrix
 
-# Removing t = 0, such that Σ is invertible
-n = 500.0;
-t = Vector(0.1:1/n:1)
 
-# Creating a test matrix Σ = tril(UV') + triu(VU',1) that is PSD
-p = 2
-Ut, Vt = spline_kernel(t', p)
-K  = DiaSymSemiseparableMatrix(Ut,Vt,ones(size(Ut,2)))
-Σ    = Matrix(K)
-chol = cholesky(Σ)
-L = cholesky(K)
-x = randn(size(K,1))
+W = ones(3,100)
+U = ones(3,100)
+V = ones(3,100)
+X = ones(100,2)
+for (u,v,x) in zip(eachcol(U),eachcol(V),eachrow(X))
+end
 
-# Testing inverses (Using Cholesky factorizations)
-B = randn(length(t),10)
-b = rand(length(t))
-@test L\B  ≈ chol.L\B
-@test L\b  ≈ chol.L\b
-@which (L\B)
-@which (L\b)
-@test L'\B ≈ chol.U\B
-@test L*B  ≈ chol.L*B
-@test L'*B ≈ chol.U*B
 
-# Testing logdet
-@test logdet(L) ≈ logdet(chol.L)
-@test det(L) ≈ det(chol.L)
+for (u,v) in zip(reverse(eachcol(U)),eachcol(V))
+    println(dot(u,v))
+end
 
-# Testing traces and norm
-M = SymSemiseparableMatrix(Ut,Vt)
-@test isapprox(tr(L,M), tr(chol\Matrix(M)), atol=1e-6)
-@test trinv(L) ≈ tr(chol\Diagonal(ones(size(L,1))))
-@test SymSemiseparableMatrices.fro_norm_L(L) ≈ norm(chol.L[:])^2
+d = rand(10)
+for ds in eachrow(d)
+    println(typeof(ds[1]))
+end
 
-# Testing show
-@test L.L ≈ tril(Ut'*L.Wt,-1) + Diagonal(L.d)
-@test L.U ≈ triu(L.Wt'*Ut,1) + Diagonal(L.d)
-@test Matrix(L) ≈ tril(L.Ut'*L.Wt,-1) + Diagonal(L.d)
-@test L[3,1] ≈ chol.L[3,1]
-@test L[2,2] ≈ chol.L[2,2]
-@test L[1,3] ≈ chol.L[1,3]
 
-# # Testing explicit-implicit-inverse
-Yt, Zt = SymSemiseparableMatrices.dss_create_yz(L.Ut,L.Wt,L.d)
-@test tril(Yt'*Zt,-1) + Diagonal(L.d.^(-1)) ≈ inv(chol.L)
-@test L*(tril(Yt'*Zt,-1) + Diagonal(L.d.^(-1))) ≈ I
-@test L'*(triu(Zt'*Yt,1) + Diagonal(L.d.^(-1))) ≈ I
-@test SymSemiseparableMatrices.squared_norm_cols(Yt,Zt,L.d.^(-1)) ≈ sum(inv(chol.L).^2,dims=1)'
+A = rand(5,5)
+
+for j=1:size(A,2),i = 1:size(A,1)
+    println((i,j))
+end

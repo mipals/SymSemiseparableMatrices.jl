@@ -2,5 +2,5 @@
 *.jl.cov
 *.jl.mem
 .DS_Store
-/Manifest.toml
-/dev/
+Manifest.toml
+test/test.jl

@@ -1,7 +1,7 @@
 #==========================================================================================
                                 Constructors
 ==========================================================================================#
-function DiaSymSemiseparableCholesky(U::AbstractArray, W::AbstractArray, ds::AbstractArray) 
+function DiaSymSemiseparableCholesky(U::AbstractArray, W::AbstractArray, ds::AbstractArray)
     return DiaSymSemiseparableCholesky(size(U,1),size(U,2),U,W,ds)
 end
 function DiaSymSemiseparableCholesky(U::AbstractArray, V::AbstractArray, σn, σf)
@@ -14,19 +14,19 @@ function DiaSymSemiseparableCholesky(L::DiaSymSemiseparableMatrix)
     return DiaSymSemiseparableCholesky(L.n, L.p, L.Ut, W, dbar)
 end
 #==========================================================================================
-                        Defining Matrix Properties
+                    Defining Matrix Properties / Overloading Base
 ==========================================================================================#
 Base.Matrix(K::DiaSymSemiseparableCholesky) = getproperty(K,:L)
 Base.size(K::DiaSymSemiseparableCholesky) = (K.n, K.n)
-Base.size(K::DiaSymSemiseparableCholesky,d::Int) = (1 <= d && d <=2) ? size(K)[d] : throw(ArgumentError("Invalid dimension $d"))
-
-function getindex(K::DiaSymSemiseparableCholesky, i::Int, j::Int)
+function Base.size(K::DiaSymSemiseparableCholesky,d::Int)
+    return (1 <= d && d <=2) ? size(K)[d] : throw(ArgumentError("Invalid dimension $d"))
+end
+function Base.getindex(K::DiaSymSemiseparableCholesky, i::Int, j::Int)
 	i > j && return dot(K.Ut[:,i], K.Wt[:,j])
 	i == j && return K.d[i]
 	return 0
 end
-
-function getproperty(K::DiaSymSemiseparableCholesky, d::Symbol)
+function Base.getproperty(K::DiaSymSemiseparableCholesky, d::Symbol)
     if d === :U
         return UpperTriangular(triu(K.Wt'*K.Ut,1) + Diagonal(K.d))
     elseif d === :L
@@ -35,9 +35,9 @@ function getproperty(K::DiaSymSemiseparableCholesky, d::Symbol)
         return getfield(K, d)
     end
 end
-
-Base.propertynames(F::DiaSymSemiseparableCholesky, private::Bool=false) =
-    (:U, :L, (private ? fieldnames(typeof(F)) : ())...)
+function Base.propertynames(F::DiaSymSemiseparableCholesky, private::Bool=false)
+    return (:U, :L, (private ? fieldnames(typeof(F)) : ())...)
+end
 
 function Base.show(io::IO, mime::MIME{Symbol("text/plain")},
 		 K::DiaSymSemiseparableCholesky{<:Any,<:AbstractArray,<:AbstractArray,<:AbstractArray})
@@ -45,9 +45,17 @@ function Base.show(io::IO, mime::MIME{Symbol("text/plain")},
     show(io, mime, K.L)
 end
 #==========================================================================================
-                    Defining multiplication and inverse
+                            Overloading LinearAlgebra routines
 ==========================================================================================#
-function LinearAlgebra.mul!(y::AbstractArray, L::DiaSymSemiseparableCholesky, b::AbstractArray) 
+dss_logdet(d) = sum(log,d)
+newlogdet(L::DiaSymSemiseparableCholesky) = dss_logdet(L.d)
+newlogdet(L::Adjoint{<:Any,<:DiaSymSemiseparableCholesky}) = dss_logdet(L.parent.d)
+LinearAlgebra.logdet(L::DiaSymSemiseparableCholesky) = dss_logdet(L.d)
+LinearAlgebra.logdet(L::Adjoint{<:Any,<:DiaSymSemiseparableCholesky}) = dss_logdet(L.parent.d)
+#==========================================================================================
+                        Defining multiplication and inverse
+==========================================================================================#
+function LinearAlgebra.mul!(y::AbstractArray, L::DiaSymSemiseparableCholesky, b::AbstractArray)
     dss_tri_mul!(y, L.Ut, L.Wt, L.d, b)
     return y
 end
@@ -55,20 +63,20 @@ function LinearAlgebra.mul!(y::AbstractArray, L::Adjoint{<:Any,<:DiaSymSemisepar
     dssa_tri_mul!(y, L.parent.Ut, L.parent.Wt, L.parent.d, b)
     return y
 end
-function LinearAlgebra.ldiv!(y::AbstractArray, L::DiaSymSemiseparableCholesky, b::AbstractArray) 
+function LinearAlgebra.ldiv!(y::AbstractArray, L::DiaSymSemiseparableCholesky, b::AbstractArray)
     dss_forward!(y, L.Ut, L.Wt, L.d, b)
     return y
 end
-function LinearAlgebra.ldiv!(y::AbstractArray, L::Adjoint{<:Any,<:DiaSymSemiseparableCholesky}, b::AbstractArray) 
+function LinearAlgebra.ldiv!(y::AbstractArray, L::Adjoint{<:Any,<:DiaSymSemiseparableCholesky}, b::AbstractArray)
     dssa_backward!(y, L.parent.Ut, L.parent.Wt, L.parent.d, b)
     return y
 end
-function (Base.:\)(L::DiaSymSemiseparableCholesky, b::AbstractVecOrMat) 
+function (Base.:\)(L::DiaSymSemiseparableCholesky, b::AbstractVecOrMat)
     y = similar(b)
     dss_forward!(y, L.Ut, L.Wt, L.d, b)
     return y
 end
-function (Base.:\)(L::Adjoint{<:Any,<:DiaSymSemiseparableCholesky}, b::AbstractVecOrMat) 
+function (Base.:\)(L::Adjoint{<:Any,<:DiaSymSemiseparableCholesky}, b::AbstractVecOrMat)
     y = similar(b)
     dssa_backward!(y, L.parent.Ut, L.parent.Wt, L.parent.d, b)
     return y
@@ -131,53 +139,46 @@ function dss_create_wdbar(U, V, d)
     P  = zeros(m, m)
     W  = zeros(m, n)
     dbar = zeros(n)
-    for i = 1:n
-        tmpU  = @view U[:,i]
-        tmpW  = V[:,i] - P*tmpU
-        tmpds = sqrt(tmpU'*tmpW + d[i])
-        tmpW  = tmpW/tmpds
-        W[:,i] = tmpW
-        dbar[i] = tmpds
-        P += tmpW*tmpW'
+    @inbounds for (u,v,w,i) in zip(eachcol(U),eachcol(V),eachcol(W),eachindex(d))
+        w      .= v - P*u
+        dbar[i] = sqrt(dot(u,w) + d[i])
+        w      .= w/dbar[i]
+        add_outer_product!(P,w) #
     end
     return W, dbar
 end
 #### Multiplying with Ld ####
 function dss_tri_mul!(Y,U,W,ds,X)
-    m, n = size(U)
-    mx = size(X, 2)
-    Wbar = zeros(m, mx)
-    @inbounds for i = 1:n
-        tmpW = @view W[:,i]
-        tmpU = @view U[:,i]
-        tmpX = @view X[i:i,:]
-        Y[i,:] = tmpU'*Wbar + ds[i]*tmpX
-        Wbar  += tmpW*tmpX
+    p     = size(U,1)
+    n_rhs = size(X,2)
+    Wbar  = zeros(p,n_rhs)
+    @inbounds for (u,w,y,x,i) in zip(eachcol(U),eachcol(W),eachrow(Y),eachrow(X),eachindex(ds))
+        add_Y_tri_diag!(y,u,Wbar,x,ds[i]) #Y[i,:] = tmpU'*Wbar + ds[i]*tmpX
+        add_product!(Wbar,w,x) # Wbar  += tmpW*tmpX
     end
 end
 #### Adjoint of Ld ####
 function dssa_tri_mul!(Y,U,W,ds,X)
-    m, n = size(U)
-    mx = size(X, 2)
-    Ubar = zeros(m,mx)
-    @inbounds for i = n:-1:1
-        tmpW = @view W[:,i]
-        tmpU = @view U[:,i]
-        tmpX = @view X[i:i,:]
-        Y[i,:] = tmpW'*Ubar + ds[i]*tmpX;
-        Ubar = Ubar + tmpU*tmpX;
+    p     = size(U,1)
+    n_rhs = size(X, 2)
+    Ubar  = zeros(p,n_rhs)
+    for (u,w,y,x,i) in zip(Iterators.reverse(eachcol(U)),
+                           Iterators.reverse(eachcol(W)),
+                           Iterators.reverse(eachrow(Y)),
+                           Iterators.reverse(eachrow(X)),
+                           Iterators.reverse(eachindex(ds)))
+        add_Y_tri_diag!(y,w,Ubar,x,ds[i])    # Y[i,:] = tmpW'*Ubar + ds[i]*tmpX
+        add_product!(Ubar,u,x)                    # Ubar = Ubar + tmpU*tmpX
     end
 end
 #### Forward substitution ####
 function dss_forward!(X,U,W,ds,B)
-    m, n = size(U)
-    mx = size(B,2)
-    Wbar = zeros(m,mx)
-    @inbounds for i = 1:n
-        tmpU = @view U[:,i]
-        tmpW = @view W[:,i]
-        X[i:i,:] = (B[i:i,:] - tmpU'*Wbar)/ds[i]
-        Wbar += tmpW .* X[i:i,:]
+    p     = size(U,1)
+    n_rhs = size(B,2)
+    Wbar  = zeros(p,n_rhs)
+    for (u,w,x,b,i) in zip(eachcol(U),eachcol(W),eachrow(X),eachrow(B),eachindex(ds))
+        x .= (b - Wbar'*u)/ds[i]
+        add_inner_plus!(Wbar,w,x)
     end
 end
 #### Backward substitution ####
@@ -185,11 +186,13 @@ function dssa_backward!(X,U,W,ds,B)
     m, n = size(U)
     mx = size(B,2)
     Ubar = zeros(m,mx)
-    @inbounds for i = n:-1:1
-        tmpU = @view U[:,i]
-        tmpW = @view W[:,i]
-        X[i:i,:] = (B[i:i,:] - tmpW'*Ubar)/ds[i]
-        Ubar += tmpU .* X[i:i,:]
+    for (u,w,b,x,i) in zip(Iterators.reverse(eachcol(U)),
+                           Iterators.reverse(eachcol(W)),
+                           Iterators.reverse(eachrow(B)),
+                           Iterators.reverse(eachrow(X)),
+                           Iterators.reverse(eachindex(ds)))
+        x .= (b - Ubar'*w)/ds[i]
+        add_inner_plus!(Ubar,u,x) # Ubar += tmpU .* X[i:i,:]
     end
 end
 
@@ -198,11 +201,11 @@ function squared_norm_cols(U,W,dbar)
     m, n = size(U)
     P = zeros(m, m)
     c = zeros(n)
-    @inbounds for i = n:-1:1
-        tmpW = @view W[:,i]
-        tmpU = @view U[:,i]
-        c[i]  = dbar[i]^2 + tmpW'*P*tmpW
-        P += tmpU*tmpU'
+    for (w,u,i) in zip(Iterators.reverse(eachcol(W)),
+                       Iterators.reverse(eachcol(U)),
+                       Iterators.reverse(eachindex(dbar)))
+        c[i]  = dbar[i]^2 + w'*P*w
+        add_outer_product!(P,u) # P += tmpU*tmpU'
     end
     return c
 end
@@ -216,9 +219,3 @@ function dss_create_yz(U, W,dbar)
     # Probably best not to use inv
     return copy(Y'), copy((Z*inv(U*Z - Diagonal(ones(m))))')
 end
-#### Log-determinant ####
-dss_logdet(d) = sum(log,d)
-newlogdet(L::DiaSymSemiseparableCholesky) = dss_logdet(L.d)
-LinearAlgebra.logdet(L::DiaSymSemiseparableCholesky) = dss_logdet(L.d)
-newlogdet(L::Adjoint{<:Any,<:DiaSymSemiseparableCholesky}) = dss_logdet(L.parent.d)
-LinearAlgebra.logdet(L::Adjoint{<:Any,<:DiaSymSemiseparableCholesky}) = dss_logdet(L.parent.d)

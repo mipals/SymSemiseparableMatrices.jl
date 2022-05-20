@@ -15,13 +15,11 @@ function DiaSymSemiseparableMatrix(L::DiaSymSemiseparableCholesky)
     V, d = dss_create_vd(L.Ut, L.Wt, L.ds);
     return DiaSymSemiseparableMatrix(L.n, L.p, L.Ut, V, d)
 end
-
 #==========================================================================================
-                        Defining Matrix Properties
+                    Defining Matrix Properties / Overloading Base
 ==========================================================================================#
-Matrix(K::DiaSymSemiseparableMatrix) = tril(K.Ut'*K.Vt) + triu(K.Vt'*K.Ut,1) + Diagonal(K.d)
-size(K::DiaSymSemiseparableMatrix)   = (K.n,K.n)
-LinearAlgebra.cholesky(K::DiaSymSemiseparableMatrix) = DiaSymSemiseparableCholesky(K)
+Base.Matrix(K::DiaSymSemiseparableMatrix) = tril(K.Ut'*K.Vt) + triu(K.Vt'*K.Ut,1) + Diagonal(K.d)
+Base.size(K::DiaSymSemiseparableMatrix)   = (K.n,K.n)
 function getindex(K::DiaSymSemiseparableMatrix{T}, i::Int, j::Int) where T
 	i > j && return dot(K.Ut[:,i],K.Vt[:,j])
 	j == i && return dot(K.Vt[:,i],K.Ut[:,j]) + K.d[i]
@@ -29,7 +27,14 @@ function getindex(K::DiaSymSemiseparableMatrix{T}, i::Int, j::Int) where T
 end
 Base.propertynames(F::DiaSymSemiseparableMatrix, private::Bool=false) =
     (private ? fieldnames(typeof(F)) : ())
-
+#==========================================================================================
+                            Overloading LinearAlgebra routines
+==========================================================================================#
+LinearAlgebra.cholesky(K::DiaSymSemiseparableMatrix) = DiaSymSemiseparableCholesky(K)
+LinearAlgebra.logdet(K::DiaSymSemiseparableMatrix) = 2.0*logdet(cholesky(K))
+LinearAlgebra.det(K::DiaSymSemiseparableMatrix)    = det(cholesky(K))^2
+LinearAlgebra.logdet(L::Adjoint{<:Any,<:DiaSymSemiseparableMatrix}) = logdet(L.parent)
+LinearAlgebra.det(K::Adjoint{<:Any,<:DiaSymSemiseparableMatrix})    = det(cholesky(K.parent))^2
 #==========================================================================================
                         Defining multiplication and inverse
 ==========================================================================================#
@@ -73,17 +78,12 @@ end
 Computes the matrix-matrix product `Y = (tril(U*V') + triu(V*U',1) + diag(d))*X`.
 """
 function dss_mul_mat!(Y, U, V, d, X)
-    p, n = size(U)
-    mx = size(X,2)
-    Vbar = zeros(p,mx)
     Ubar = U*X
-    @inbounds for i = 1:n
-        tmpV = @view V[:,i]
-        tmpU = @view U[:,i]
-        tmpX = @view X[i:i,:]
-        Ubar -= tmpU .* tmpX;
-        Vbar += tmpV .* tmpX;
-        Y[i,:] = tmpU'*Vbar + tmpV'*Ubar + d[i]*tmpX
+    Vbar = zeros(eltype(X),size(Ubar))
+    @inbounds for (u,v,y,x,i) in zip(eachcol(U),eachcol(V),eachrow(Y),eachrow(X),eachindex(d))
+        add_inner_minus!(Ubar,u,x)
+        add_inner_plus!(Vbar,v,x)
+        add_Y_diag!(y,Ubar,Vbar,u,v,x,d[i]) # Y[i,:] = tmpU'*Vbar + tmpV'*Ubar + d[i]*tmpX
     end
 	return Y
 end
@@ -95,16 +95,14 @@ Using `L = tril(U*W',-1) + Diagonal(dbar)`, compute `V` and `d` such that
 `LL = tril(UV') + triu(V'*U,1) + Diagonal(d)`.
 """
 function dss_create_vd(U, W, dbar)
-    m, n = size(U)
+    p, n = size(U)
     d = zeros(n)
-    V = zeros(n,m)
-    P = zeros(m,m)
-    @inbounds for i = 1:n
-        tmpU = @view U[:,:]
-        tmpW = @view W[:,:]
-        d[i] = dbar[i]^2 - tmpU'*tmpW
-        V[:,i] = P*tmpU
-        P += tmpW*tmpW'
+    V = zeros(n,p)
+    P = zeros(p,p)
+    @inbounds for (u,w,v,i) in zip(eachcol(U),eachcol(W),eachcol(V),eachindex(dbar))
+        d[i]  = dbar[i]^2 - dot(u,w)
+        v    .= P*u
+        add_outer_product!(P,w)
     end
     return V, d
 end

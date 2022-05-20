@@ -3,7 +3,7 @@ n = length(t); p = 2;
 Ut, Vt = spline_kernel(t', p)
 
 K = SymSemiseparableMatrix(Ut,Vt)
-x = randn(size(K,1))
+x = randn(size(K,1),10)
 Kfull = Matrix(K)
 
 # Testing multiplication
