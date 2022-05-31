@@ -1,6 +1,11 @@
+using LinearAlgebra
+using SymSemiseparableMatrices
+
+# Removing t = 0, such that Σ is invertible
 t = Vector(0.1:0.1:10)
-n = length(t); p = 2;
-Ut, Vt = spline_kernel(t', p)
+n = length(t)
+p = 2
+Ut, Vt = SymSemiseparableMatrices.spline_kernel(t', p)
 
 K = SymSemiseparableMatrix(Ut,Vt)
 x = randn(size(K,1),10)

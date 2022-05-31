@@ -1,9 +1,11 @@
+using LinearAlgebra
+using SymSemiseparableMatrices
 # Removing t = 0, such that Σ is invertible
 t = Vector(0.1:0.1:100)
 p = 2
 
 # Creating generators U,V that result in a positive-definite matrix Σ
-Ut, Vt = spline_kernel(t', p)
+Ut, Vt = SymSemiseparableMatrices.spline_kernel(t', p)
 
 K = DiaSymSemiseparableMatrix(Ut,Vt,ones(size(Ut,2)))
 x = randn(size(K,1))
