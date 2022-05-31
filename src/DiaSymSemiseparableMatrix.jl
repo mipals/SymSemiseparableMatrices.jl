@@ -25,16 +25,17 @@ function getindex(K::DiaSymSemiseparableMatrix{T}, i::Int, j::Int) where T
 	j == i && return dot(K.Vt[:,i],K.Ut[:,j]) + K.d[i]
 	return dot(K.Vt[:,i],K.Ut[:,j])
 end
-Base.propertynames(F::DiaSymSemiseparableMatrix, private::Bool=false) =
-    (private ? fieldnames(typeof(F)) : ())
+function Base.propertynames(F::DiaSymSemiseparableMatrix, private::Bool=false)
+    return (private ? fieldnames(typeof(F)) : ())
+end
 #==========================================================================================
                             Overloading LinearAlgebra routines
 ==========================================================================================#
 LinearAlgebra.cholesky(K::DiaSymSemiseparableMatrix) = DiaSymSemiseparableCholesky(K)
-LinearAlgebra.logdet(K::DiaSymSemiseparableMatrix) = 2.0*logdet(cholesky(K))
-LinearAlgebra.det(K::DiaSymSemiseparableMatrix)    = det(cholesky(K))^2
+LinearAlgebra.logdet(K::DiaSymSemiseparableMatrix)   = 2.0*logdet(cholesky(K))
+LinearAlgebra.det(K::DiaSymSemiseparableMatrix)      = det(cholesky(K))^2
 LinearAlgebra.logdet(L::Adjoint{<:Any,<:DiaSymSemiseparableMatrix}) = logdet(L.parent)
-LinearAlgebra.det(K::Adjoint{<:Any,<:DiaSymSemiseparableMatrix})    = det(cholesky(K.parent))^2
+LinearAlgebra.det(K::Adjoint{<:Any,<:DiaSymSemiseparableMatrix}) = det(cholesky(K.parent))^2
 #==========================================================================================
                         Defining multiplication and inverse
 ==========================================================================================#

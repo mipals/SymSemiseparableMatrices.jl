@@ -47,16 +47,16 @@ end
 ==========================================================================================#
 function LinearAlgebra.det(L::SymSemiseparableCholesky)
     dd = one(eltype(L))
-    @inbounds for i in 1:L.n
-        dd *= dot(L.Ut[:,i],L.Wt[:,i])
+    @inbounds for (u,w) in zip(eachcol(L.Ut),eachcol(L.Wt))
+        dd *= dot(u,w)
     end
     return dd
 end
 
 function LinearAlgebra.logdet(L::SymSemiseparableCholesky)
     dd = zero(eltype(L))
-    @inbounds for i in 1:L.n
-        dd += log(dot(L.Ut[:,i],L.Wt[:,i]))
+    @inbounds for (u,w) in zip(eachcol(L.Ut),eachcol(L.Wt))
+        dd += log(dot(u,w))
     end
     return dd
 end
