@@ -2,13 +2,14 @@ using LinearAlgebra
 using SymSemiseparableMatrices
 
 # Removing t = 0, such that Σ is invertible
+# t = convert.(Float32,Vector(0.1:0.1:10))
 t = Vector(0.1:0.1:10)
 n = length(t)
 p = 2
 Ut, Vt = SymSemiseparableMatrices.spline_kernel(t', p)
 
 K = SymSemiseparableMatrix(Ut,Vt)
-x = randn(size(K,1),10)
+x = randn(eltype(K),size(K,1),10)
 Kfull = Matrix(K)
 
 # Testing multiplication
@@ -20,7 +21,7 @@ Kfull = Matrix(K)
 
 # Testing (log)determinant
 @test logdet(K) ≈ logdet(Kfull)
-@test det(K) ≈ det(Kfull)
+@test det(K)    ≈ det(Kfull)
 
 # Testing show
 @test Matrix(K) ≈ tril(Ut'*Vt) + triu(Vt'*Ut,1)

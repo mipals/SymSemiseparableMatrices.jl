@@ -77,7 +77,7 @@ Computes the matrix-matrix product `Y = (tril(U'*V) + triu(V'*U,1))*X` in linear
 function ss_mul_mat!(Y, U, V, X)
     p     = size(U,1)
     n_rhs = size(X,2)
-    Vbar  = zeros(p,n_rhs)
+    Vbar  = zeros(eltype(Y),p,n_rhs)
     Ubar  = U*X
     for (u,v,y,x) in zip(eachcol(U),eachcol(V),eachrow(Y),eachrow(X))
         add_inner_minus!(Ubar,u,x)    # Ubar -= u .* x
@@ -94,8 +94,8 @@ Using `L = tril(U*W')`, compute `V` such that `LL = tril(UV') + triu(V'*U,1)`.
 """
 function ss_create_v(U, W)
     m,n = size(U)
-    V   = zeros(n,m)
-    P   = zeros(m,m)
+    V   = zeros(eltype(U),n,m)
+    P   = zeros(eltype(U),m,m)
     @inbounds for i = 1:n
         tmpW = @view W[:,i]
         tmpU = @view U[:,i]

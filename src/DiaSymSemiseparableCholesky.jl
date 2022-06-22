@@ -6,7 +6,7 @@ function DiaSymSemiseparableCholesky(U::AbstractArray, W::AbstractArray, ds::Abs
 end
 function DiaSymSemiseparableCholesky(U::AbstractArray, V::AbstractArray, σn, σf)
     n, p = size(U)
-    W, dbar = dss_create_wdbar(σf*U, σf*V, ones(n)*σn^2)
+    W, dbar = dss_create_wdbar(σf*U, σf*V, ones(eltype(U),n)*σn^2)
     return DiaSymSemiseparableCholesky(n, p, σf*U, W, dbar)
 end
 function DiaSymSemiseparableCholesky(L::DiaSymSemiseparableMatrix)
@@ -84,7 +84,7 @@ end
 
 #### Inverse of a EGRQSCholesky using the Cholesky factorization ####
 function inv(L::DiaSymSemiseparableCholesky)
-	return L'\(L\Diagonal(ones(L.n)))
+	return L'\(L\Diagonal(ones(eltype(L),L.n)))
 end
 function inv(L::DiaSymSemiseparableCholesky, b::AbstractArray)
 	return L'\(L\b)
@@ -111,9 +111,9 @@ function tr(Ky::DiaSymSemiseparableCholesky, K::SymSemiseparableMatrix)
 	U = K.Ut
 	V = K.Vt
 	Y, Z = dss_create_yz(Ky.Ut, Ky.Wt, Ky.d)
-	b = 0.0
-	P = zeros(p,p)
-	R = zeros(p,p)
+	b = zero(eltype(U))
+	P = zeros(eltype(U),p,p)
+	R = zeros(eltype(U),p,p)
 	@inbounds for k = 1:Ky.n
 		yk = @view Y[:,k]
 		zk = @view Z[:,k]
@@ -136,9 +136,9 @@ Computes `W` and `dbar` such that, `L = tril(UW',-1) + diag(ds)`.
 """
 function dss_create_wdbar(U, V, d)
     m, n = size(U)
-    P  = zeros(m, m)
-    W  = zeros(m, n)
-    dbar = zeros(n)
+    P  = zeros(eltype(U),m, m)
+    W  = zeros(eltype(U),m, n)
+    dbar = zeros(eltype(U),n)
     @inbounds for (u,v,w,i) in zip(eachcol(U),eachcol(V),eachcol(W),eachindex(d))
         w      .= v - P*u
         dbar[i] = sqrt(dot(u,w) + d[i])
@@ -151,7 +151,7 @@ end
 function dss_tri_mul!(Y,U,W,ds,X)
     p     = size(U,1)
     n_rhs = size(X,2)
-    Wbar  = zeros(p,n_rhs)
+    Wbar  = zeros(eltype(Y),p,n_rhs)
     @inbounds for (u,w,y,x,i) in zip(eachcol(U),eachcol(W),eachrow(Y),eachrow(X),eachindex(ds))
         add_Y_tri_diag!(y,u,Wbar,x,ds[i]) #Y[i,:] = tmpU'*Wbar + ds[i]*tmpX
         add_product!(Wbar,w,x) # Wbar  += tmpW*tmpX
@@ -161,7 +161,7 @@ end
 function dssa_tri_mul!(Y,U,W,ds,X)
     p     = size(U,1)
     n_rhs = size(X, 2)
-    Ubar  = zeros(p,n_rhs)
+    Ubar  = zeros(eltype(Y),p,n_rhs)
     for (u,w,y,x,i) in zip(Iterators.reverse(eachcol(U)),
                            Iterators.reverse(eachcol(W)),
                            Iterators.reverse(eachrow(Y)),
@@ -175,7 +175,7 @@ end
 function dss_forward!(X,U,W,ds,B)
     p     = size(U,1)
     n_rhs = size(B,2)
-    Wbar  = zeros(p,n_rhs)
+    Wbar  = zeros(eltype(X),p,n_rhs)
     for (u,w,x,b,i) in zip(eachcol(U),eachcol(W),eachrow(X),eachrow(B),eachindex(ds))
         x .= (b - Wbar'*u)/ds[i]
         add_inner_plus!(Wbar,w,x)
@@ -184,8 +184,8 @@ end
 #### Backward substitution ####
 function dssa_backward!(X,U,W,ds,B)
     m, n = size(U)
-    mx = size(B,2)
-    Ubar = zeros(m,mx)
+    mx   = size(B,2)
+    Ubar = zeros(eltype(X),m,mx)
     for (u,w,b,x,i) in zip(Iterators.reverse(eachcol(U)),
                            Iterators.reverse(eachcol(W)),
                            Iterators.reverse(eachrow(B)),
@@ -199,8 +199,8 @@ end
 #### Squared norm of columns of L = tril(UW',-1) + diag(dbar) ####
 function squared_norm_cols(U,W,dbar)
     m, n = size(U)
-    P = zeros(m, m)
-    c = zeros(n)
+    P = zeros(eltype(U),m, m)
+    c = zeros(eltype(U),n)
     for (w,u,i) in zip(Iterators.reverse(eachcol(W)),
                        Iterators.reverse(eachcol(U)),
                        Iterators.reverse(eachindex(dbar)))
@@ -212,10 +212,10 @@ end
 #### Implicit inverse of  L = tril(UW',-1) + diag(dbar) ####
 function dss_create_yz(U, W,dbar)
     m, n = size(U)
-    Y = zeros(n,m)
-    Z = zeros(n,m)
+    Y = zeros(eltype(U),n,m)
+    Z = zeros(eltype(U),n,m)
     dss_forward!(Y, U, W, dbar, U')
     dssa_backward!(Z, U, W, dbar, W')
     # Probably best not to use inv
-    return copy(Y'), copy((Z*inv(U*Z - Diagonal(ones(m))))')
+    return copy(Y'), copy((Z*inv(U*Z - Diagonal(ones(eltype(U),m))))')
 end

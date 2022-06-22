@@ -31,7 +31,7 @@ Returns generators `U` and `V` for the spline kernel of order `p` given a list o
 function spline_kernel(t::AbstractArray, p::Int)
 
     fp = factorial.(p-1:-1:0)
-    a = alpha(p).*fp
+    a  = convert.(eltype(t),alpha(p).*fp)
     Ut = (repeat(t,p,1).^Vector(p-1:-1:0))./fp
     Vt = (repeat(t,p,1).^Vector(p:2*p-1)).*a
 

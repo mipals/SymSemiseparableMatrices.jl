@@ -107,8 +107,8 @@ is `L = tril(U*W')` in linear complexity.
 """
 function ss_create_w(U,V)
     p,n = size(U)
-    wTw = zeros(p,p)
-    W = zeros(p,n)
+    wTw = zeros(eltype(U),p,p)
+    W   = zeros(eltype(V),p,n)
     @inbounds for (u,v,w) in zip(eachcol(U),eachcol(V),eachcol(W))
         w .= (v - wTw*u)/sqrt(abs(dot(u,(v - wTw*u))))
         add_outer_product!(wTw,w)
@@ -125,7 +125,7 @@ Computes the multiplization `tril(U*W')*X = Y` in linear complexity.
 function ss_tri_mul!(Y,U,W,X)
     p     = size(U,1)
     n_rhs = size(X,2)
-    Wbar  = zeros(p,n_rhs)
+    Wbar  = zeros(eltype(Y),p,n_rhs)
     @inbounds for (w,u,y,x) in zip(eachcol(W),eachcol(U),eachrow(Y),eachrow(X))
         add_inner_plus!(Wbar,w,x)
         add_Y_tri!(y,Wbar,u)
@@ -151,7 +151,7 @@ Solves the linear system `tril(U*W')*X = B`.
 function ss_forward!(X,U,W, B)
     p     = size(U,1)
     n_rhs = size(B,2)
-    Wbar  = zeros(p, n_rhs)
+    Wbar  = zeros(eltype(X),p, n_rhs)
     @inbounds for (u,w,x,b) in zip(eachcol(U),eachcol(W),eachrow(X),eachrow(B))
         x .= (b - Wbar'*u)/dot(u,w)
         add_inner_plus!(Wbar,w,x)
@@ -165,7 +165,7 @@ Solves the linear system `triu(W*U')*X = Y`.
 function ssa_backward!(X, U, W, B)
     p     = size(U,1)
     n_rhs = size(B,2)
-    Ubar  = zeros(p,n_rhs)
+    Ubar  = zeros(eltype(X),p,n_rhs)
     @inbounds for (u,w,x,b) in zip(Iterators.reverse(eachcol(U)),
                                    Iterators.reverse(eachcol(W)),
                                    Iterators.reverse(eachrow(X)),

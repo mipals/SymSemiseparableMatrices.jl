@@ -97,9 +97,9 @@ Using `L = tril(U*W',-1) + Diagonal(dbar)`, compute `V` and `d` such that
 """
 function dss_create_vd(U, W, dbar)
     p, n = size(U)
-    d = zeros(n)
-    V = zeros(n,p)
-    P = zeros(p,p)
+    d = zeros(eltype(U),n)
+    V = zeros(eltype(U),n,p)
+    P = zeros(eltype(U),p,p)
     @inbounds for (u,w,v,i) in zip(eachcol(U),eachcol(W),eachcol(V),eachindex(dbar))
         d[i]  = dbar[i]^2 - dot(u,w)
         v    .= P*u

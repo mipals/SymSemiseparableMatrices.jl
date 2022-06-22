@@ -2,6 +2,7 @@ using LinearAlgebra
 using SymSemiseparableMatrices
 
 # Removing t = 0, such that Σ is invertible
+# t = convert.(Float32,Vector(0.1:0.1:10))
 t = Vector(0.1:0.1:10)
 p = 2
 

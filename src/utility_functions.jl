@@ -31,7 +31,7 @@ Inplace computation of `Y[i,:] = Wbar'*u`.
 """
 function add_Y_tri!(Y,Wbar,u)
     for k = 1:size(Wbar,2)
-        Y[k] = 0.0
+        Y[k] = zero(eltype(Y))
         for i = 1:size(Wbar,1)
             Y[k] += Wbar[i,k]*u[i]
         end
@@ -45,7 +45,7 @@ Inplace computation of `Y[i,:] = Vbar'*u + Ubar'*v`.
 """
 function add_Y!(Y,Ubar,Vbar,u,v)
     @inbounds for k = 1:size(Vbar,2)
-        Y[k] = 0.0
+        Y[k] = zero(eltype(Y))
         @inbounds for i = 1:size(Vbar,1)
             Y[k] += Vbar[i,k]*u[i] + Ubar[i,k]*v[i]
         end
